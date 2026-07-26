@@ -1,899 +1,1177 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Walter Zuñiga — Portfolio</title>
-<meta name="description" content="Walter Zuñiga Lineros — Ingeniero en Sistemas · Full-Stack + Data & BI. Portfolio interactivo estilo VS Code.">
-<meta property="og:title" content="Walter Zuñiga Lineros — Portfolio">
-<meta property="og:description" content="Ingeniero en Sistemas · Full-Stack + Data & BI 🍒 · Portfolio interactivo estilo VS Code.">
-<meta property="og:type" content="website">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vscode/codicons/dist/codicon.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
-<style>
-  @font-face{
-    font-family:'Cascadia Code';
-    src:url('https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code/files/cascadia-code-latin-400-normal.woff2') format('woff2');
-    font-weight:400; font-display:swap;
-  }
-  @font-face{
-    font-family:'Cascadia Code';
-    src:url('https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code/files/cascadia-code-latin-700-normal.woff2') format('woff2');
-    font-weight:700; font-display:swap;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  :root{
-    --bg:#282a36; --bg2:#21222c; --bg3:#343746; --activity:#191a21;
-    --border:#191a21; --txt:#f8f8f2; --muted:#6272a4; --blue:#8be9fd;
-    --accent:#bd93f9; --green:#50fa7b; --orange:#ffb86c; --purple:#bd93f9;
-    --yellow:#f1fa8c; --hover:#343746; --prop:#8be9fd; --num:#bd93f9; --cm:#6272a4;
-    --pink:#ff79c6; --red:#ff5555; --gutter:#6272a4;
-    --mono:'Cascadia Code','Cascadia Mono',Consolas,'Courier New',monospace;
-  }
-  /* ---- Light+ theme ---- */
-  body[data-theme="light"]{
-    --bg:#ffffff; --bg2:#f3f3f3; --bg3:#e8e8e8; --activity:#2c2c2c;
-    --border:#e0e0e0; --txt:#1e1e1e; --muted:#8a8a8a; --blue:#0070c1;
-    --accent:#007acc; --green:#098658; --orange:#a31515; --purple:#af00db;
-    --yellow:#795e26; --hover:#e8e8e8; --prop:#001080; --num:#098658; --cm:#008000;
-    --pink:#af00db; --red:#cd3131; --gutter:#237893;
-  }
-  /* ---- Monokai theme ---- */
-  body[data-theme="monokai"]{
-    --bg:#272822; --bg2:#1e1f1c; --bg3:#3e3d32; --activity:#141510;
-    --border:#141510; --txt:#f8f8f2; --muted:#75715e; --blue:#66d9ef;
-    --accent:#a6e22e; --green:#a6e22e; --orange:#fd971f; --purple:#ae81ff;
-    --yellow:#e6db74; --hover:#3e3d32; --prop:#66d9ef; --num:#ae81ff; --cm:#75715e;
-    --pink:#f92672; --red:#f92672; --gutter:#90908a;
-  }
-  body{
-    font-family:var(--mono); background:var(--bg);
-    color:var(--txt); height:100vh; overflow:hidden; font-size:13px;
-    transition:background .25s,color .25s;
-  }
-  .app{ display:flex; flex-direction:column; height:100vh; }
-
-  /* Title bar */
-  .titlebar{
-    height:30px; background:var(--bg2); display:flex; align-items:center;
-    padding:0 0 0 10px; gap:16px; flex-shrink:0; border-bottom:1px solid var(--border);
-  }
-  .win-logo{ font-size:15px; color:var(--blue); display:flex; align-items:center; }
-  .menus{ display:flex; gap:14px; color:var(--txt); font-size:12.5px; opacity:.8; }
-  .menus span{ cursor:pointer; }
-  .menus span:hover{ opacity:1; }
-  .title-center{ flex:1; text-align:center; color:var(--muted); font-size:12px; }
-  .title-center .kbd{ background:var(--bg3); padding:1px 6px; border-radius:4px; font-size:11px; margin-left:8px; cursor:pointer; }
-  .win-controls{ display:flex; height:30px; }
-  .win-btn{ width:46px; height:30px; display:flex; align-items:center; justify-content:center; color:var(--txt); opacity:.7; font-size:14px; cursor:pointer; }
-  .win-btn:hover{ background:#88888822; opacity:1; }
-  .win-btn.close:hover{ background:#e81123; color:#fff; opacity:1; }
-
-  .main{ display:flex; flex:1; overflow:hidden; }
-
-  /* Activity bar */
-  .activitybar{
-    width:48px; background:var(--activity); display:flex; flex-direction:column;
-    align-items:center; padding-top:6px; gap:2px; flex-shrink:0;
-  }
-  .act-icon{
-    width:48px; height:44px; display:flex; align-items:center; justify-content:center;
-    font-size:22px; color:#858585; cursor:pointer; border-left:2px solid transparent;
-  }
-  .act-icon.active{ color:#fff; border-left:2px solid #fff; }
-  .act-icon:hover{ color:#fff; }
-  .act-bottom{ margin-top:auto; }
-
-  /* Sidebar */
-  .sidebar{
-    width:260px; background:var(--bg2); flex-shrink:0; overflow-y:auto;
-    border-right:1px solid var(--border);
-  }
-  .sb-head{ padding:10px 16px 6px; font-size:11px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
-  .sb-project{ padding:4px 12px; font-size:11px; font-weight:700; color:var(--txt); text-transform:uppercase; letter-spacing:.05em; display:flex; align-items:center; gap:4px; }
-  .tree{ list-style:none; }
-  .tree li{ display:block; }
-  .folder,.file{
-    display:flex; align-items:center; gap:6px; padding:3px 12px 3px 12px;
-    cursor:pointer; white-space:nowrap; user-select:none; font-size:13px;
-  }
-  .folder:hover,.file:hover{ background:var(--hover); }
-  .file.active{ background:var(--bg3); }
-  .nested{ list-style:none; margin-left:14px; border-left:1px solid var(--bg3); }
-  .nested .file{ padding-left:16px; }
-  .chev{ font-size:14px; width:14px; display:inline-flex; align-items:center; transition:.15s; color:var(--muted); }
-  .fico{ font-size:15px; width:18px; text-align:center; display:inline-flex; align-items:center; justify-content:center; }
-  .fico.codicon{ color:var(--blue); }
-  .fico-folder{ color:var(--accent); }
-  .folder.collapsed + .nested{ display:none; }
-  .folder.collapsed .chev{ transform:rotate(-90deg); }
-
-  /* Editor area */
-  .editor-area{ flex:1; display:flex; flex-direction:column; overflow:hidden; }
-  .tabs{ display:flex; background:var(--bg2); height:36px; flex-shrink:0; overflow-x:auto; }
-  .tab{
-    display:flex; align-items:center; gap:8px; padding:0 10px 0 14px; height:36px;
-    background:var(--bg2); color:var(--muted); cursor:pointer; font-size:12.5px;
-    border-right:1px solid var(--border); white-space:nowrap;
-  }
-  .tab .fico{ font-size:14px; }
-  .tab.active{ background:var(--bg); color:var(--txt); border-top:1px solid var(--accent); }
-  .tab .x{ font-size:13px; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; }
-  .tab .x .close-ic{ display:none; }
-  .tab .x .dot{ font-size:9px; color:var(--muted); }
-  .tab:hover .x .close-ic{ display:inline-flex; }
-  .tab:hover .x .dot{ display:none; }
-  .tab .x:hover{ background:#88888833; }
-
-  /* Breadcrumbs */
-  .breadcrumbs{
-    height:24px; background:var(--bg); display:flex; align-items:center; gap:4px;
-    padding:0 16px; font-size:12px; color:var(--muted); border-bottom:1px solid var(--border);
-    flex-shrink:0; overflow:hidden;
-  }
-  .breadcrumbs .crumb{ display:flex; align-items:center; gap:4px; }
-  .breadcrumbs .sep{ opacity:.6; font-size:13px; }
-  .breadcrumbs .fico{ font-size:13px; width:auto; }
-
-  /* Editor main: gutter + code + minimap */
-  .editor-main{ flex:1; display:flex; overflow:hidden; position:relative; }
-  .scroll{ flex:1; overflow:auto; display:flex; align-items:flex-start; background:var(--bg); }
-  .gutter{
-    flex-shrink:0; text-align:right; padding:20px 8px 20px 12px; color:var(--gutter);
-    font-family:var(--mono); font-size:13.5px; line-height:1.65; user-select:none;
-    opacity:.55; min-width:44px;
-  }
-  .code{ flex:1; padding:20px 26px; font-family:var(--mono); font-size:13.5px; line-height:1.65; min-height:100%; }
-  .code .pane{ display:none; }
-  .code .pane.active{ display:block; animation:reveal .35s ease; }
-  @keyframes reveal{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
-  pre{ font-family:var(--mono); white-space:pre-wrap; margin:0; line-height:1.65; }
-  .kw{color:var(--purple)} .fn{color:var(--yellow)} .str{color:var(--orange)}
-  .var{color:var(--blue)} .cm{color:var(--cm)} .num{color:var(--num)} .type{color:var(--green)}
-  .prop{color:var(--prop)}
-  h1.hero{ font-size:32px; color:var(--txt); margin-bottom:6px; font-family:var(--mono); font-weight:700; }
-  .hero-sub{ color:var(--blue); font-size:15px; margin-bottom:14px; }
-  .badge{ display:inline-block; background:var(--bg3); color:var(--txt); padding:3px 10px; border-radius:12px; font-size:11px; margin:3px 4px 0 0; }
-  a{ color:var(--blue); }
-  .type-cursor{ display:inline-block; width:8px; background:var(--accent); animation:blink 1s step-end infinite; }
-  @keyframes blink{ 50%{opacity:0;} }
-
-  /* Minimap */
-  .minimap{
-    width:74px; flex-shrink:0; background:var(--bg); border-left:1px solid var(--border);
-    padding:10px 6px; overflow:hidden; position:relative;
-  }
-  .mm-line{ height:2px; margin-bottom:2px; background:var(--muted); opacity:.4; border-radius:1px; }
-  .mm-view{ position:absolute; left:0; right:0; top:10px; height:60px; background:#ffffff10; border:1px solid #ffffff18; pointer-events:none; }
-
-  /* Terminal */
-  .terminal{ height:170px; background:var(--activity); border-top:1px solid var(--border); flex-shrink:0; display:flex; flex-direction:column; }
-  .term-head{ display:flex; gap:18px; padding:6px 16px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid var(--border); }
-  .term-head .active{ color:var(--txt); border-bottom:1px solid var(--txt); padding-bottom:5px; }
-  .term-body{ flex:1; padding:10px 16px; font-family:var(--mono); font-size:13px; overflow-y:auto; line-height:1.5; color:var(--txt); }
-  .term-body .line{ margin-bottom:2px; }
-  .prompt{ color:var(--green); } .path{ color:var(--blue); }
-  #term-input{ background:transparent; border:none; color:var(--txt); font-family:var(--mono); font-size:13px; outline:none; width:60%; }
-
-  /* Status bar */
-  .statusbar{
-    height:24px; background:var(--accent); display:flex; align-items:center;
-    padding:0 12px; gap:16px; color:#282a36; font-size:12px; flex-shrink:0; font-weight:600;
-  }
-  .statusbar .seg{ display:flex; align-items:center; gap:5px; cursor:pointer; }
-  .statusbar .seg:hover{ opacity:.8; }
-  .statusbar .codicon{ font-size:14px; }
-  .statusbar .right{ margin-left:auto; display:flex; gap:16px; }
-
-  /* Command Palette */
-  .palette-overlay{
-    position:fixed; inset:0; background:#00000055; display:none; z-index:50;
-    justify-content:center; align-items:flex-start; padding-top:60px;
-  }
-  .palette-overlay.open{ display:flex; }
-  .palette{
-    width:600px; max-width:90vw; background:var(--bg2); border:1px solid var(--bg3);
-    border-radius:6px; box-shadow:0 8px 30px #000a; overflow:hidden;
-  }
-  .palette input{
-    width:100%; padding:10px 12px; background:var(--bg); border:1px solid var(--accent);
-    color:var(--txt); font-family:var(--mono); font-size:13px; outline:none;
-  }
-  .palette-list{ max-height:320px; overflow-y:auto; }
-  .palette-item{
-    display:flex; align-items:center; gap:8px; padding:7px 12px; cursor:pointer; font-size:13px;
-  }
-  .palette-item .sub{ color:var(--muted); font-size:11px; margin-left:auto; }
-  .palette-item.sel{ background:var(--accent); color:#282a36; }
-  .palette-item.sel .sub{ color:#282a36cc; }
-  .palette-item .fico{ font-size:15px; }
-
-  ::-webkit-scrollbar{ width:12px; height:12px; }
-  ::-webkit-scrollbar-thumb{ background:var(--muted); opacity:.4; }
-  ::-webkit-scrollbar-track{ background:transparent; }
-
-  /* Responsive */
-  @media (max-width:820px){
-    .menus{ display:none; }
-    .sidebar{ width:190px; }
-    .minimap{ display:none; }
-    .title-center{ font-size:11px; }
-  }
-  @media (max-width:560px){
-    .sidebar{ display:none; }
-    .statusbar .right{ display:none; }
-    .gutter{ display:none; }
-  }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
 </head>
 <body>
-<div class="app">
+<x-dc>
+<helmet>
+<meta name="description" content="Walter Zuñiga Lineros — Ingeniero en Sistemas · Full-Stack & Business Intelligence. Portafolio interactivo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vscode/codicons/dist/codicon.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+<script src="./image-slot.js"></script>
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; padding:0;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Consolas,monospace;
+    --serif:'Instrument Serif',Georgia,serif;
+    --bg:#0f1115; --bg2:#0b0d11; --bg3:#171b22; --act:#08090c; --bd:#1b202a;
+    --txt:#e7e9ed; --dim:#98a0ab; --mut:#5c6470; --sel:#1e2530;
+    --k:#c8a6e9; --s:#a8cdb3; --v:#9dc6e2; --f:#e5c48f; --t:#e0b384;
+    --n:#dba6b4; --p:#a9c6e8; --c:#5c6470; --ac:#e0b384; --ac2:#9dc6e2;
+    --sbw:272px; --sbpos:relative; --sbx:0px; --mmd:block; --gtd:block;
+    --termd:flex; --navd:none; --scrimd:none; --sbsh:none;
+    background:#0f1115; color:#e7e9ed;
+    font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  @keyframes rise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes blink{ 0%,45%{ opacity:1; } 50%,95%{ opacity:0; } }
+  @keyframes fade{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes pop{ from{ opacity:0; transform:translateY(-8px) scale(.985); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb{ background:#ffffff1a; border-radius:99px; border:2px solid transparent; background-clip:padding-box; }
+  ::-webkit-scrollbar-thumb:hover{ background:#ffffff30; background-clip:padding-box; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  [data-tabstrip]::-webkit-scrollbar{ height:0; width:0; }
+  ::selection{ background:#e0b38433; }
+  a{ color:var(--ac2); text-decoration:none; border-bottom:1px solid transparent; transition:border-color .2s,color .2s; }
+  a:hover{ color:var(--ac); border-bottom-color:var(--ac); }
+</style>
+</helmet>
 
-  <div class="titlebar">
-    <span class="win-logo"><i class="codicon codicon-vscode"></i></span>
-    <div class="menus"><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span>Help</span></div>
-    <div class="title-center">walter-zuniga.dev — Visual Studio Code <span class="kbd" onclick="openPalette('>')">Ctrl+Shift+P</span></div>
-    <div class="win-controls">
-      <div class="win-btn" title="Minimizar"><i class="codicon codicon-chrome-minimize"></i></div>
-      <div class="win-btn" title="Maximizar"><i class="codicon codicon-chrome-maximize"></i></div>
-      <div class="win-btn close" title="Cerrar"><i class="codicon codicon-chrome-close"></i></div>
+<div ref="{{ rootRef }}" style="height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--txt);font-family:var(--mono);font-size:13.5px;letter-spacing:-0.005em">
+
+  <div style="height:38px;flex-shrink:0;display:flex;align-items:center;gap:18px;padding:0 8px 0 14px;background:var(--bg2);border-bottom:1px solid var(--bd)">
+    <div onClick="{{ toggleNav }}" style="display:var(--navd);width:30px;height:30px;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .2s,color .2s" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-menu" style="font-size:17px"></i></div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="width:20px;height:20px;border-radius:6px;background:linear-gradient(150deg,var(--ac),#b98550);display:flex;align-items:center;justify-content:center;color:#12100c;font-family:var(--serif);font-size:13px;line-height:1;padding-top:1px">W</span>
+      <span style="color:var(--dim);font-size:12px;letter-spacing:.02em">walter-zuniga</span>
+    </div>
+    <div style="display:flex;gap:16px;color:var(--dim);font-size:12px">
+      <span style="cursor:default;transition:color .2s" style-hover="color:var(--txt)">Archivo</span>
+      <span style="cursor:default;transition:color .2s" style-hover="color:var(--txt)">Editar</span>
+      <span style="cursor:default;transition:color .2s" style-hover="color:var(--txt)">Ver</span>
+      <span onClick="{{ openPalette }}" style="cursor:pointer;transition:color .2s" style-hover="color:var(--txt)">Ir</span>
+      <span onClick="{{ focusTerm }}" style="cursor:pointer;transition:color .2s" style-hover="color:var(--txt)">Terminal</span>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:10px;min-width:0">
+      <span style="color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Portafolio — Walter Zuñiga Lineros</span>
+      <span onClick="{{ openPalette }}" style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--bd);color:var(--dim);padding:2px 9px;border-radius:6px;font-size:11px;cursor:pointer;white-space:nowrap;transition:border-color .2s,color .2s" style-hover="color:var(--txt);border-color:var(--ac)"><i class="codicon codicon-search" style="font-size:11px"></i> Ctrl+Shift+P</span>
+    </div>
+    <div style="display:flex;gap:2px;color:var(--mut)">
+      <div style="width:32px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background .2s" style-hover="background:var(--bg3)"><i class="codicon codicon-chrome-minimize" style="font-size:12px"></i></div>
+      <div style="width:32px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background .2s" style-hover="background:var(--bg3)"><i class="codicon codicon-chrome-maximize" style="font-size:12px"></i></div>
+      <div style="width:32px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background .2s,color .2s" style-hover="background:#c0455533;color:#e88"><i class="codicon codicon-chrome-close" style="font-size:12px"></i></div>
     </div>
   </div>
 
-  <div class="main">
-    <div class="activitybar">
-      <div class="act-icon active" title="Explorer"><i class="codicon codicon-files"></i></div>
-      <div class="act-icon" title="Search"><i class="codicon codicon-search"></i></div>
-      <div class="act-icon" title="Source Control"><i class="codicon codicon-source-control"></i></div>
-      <div class="act-icon" title="Run & Debug"><i class="codicon codicon-debug-alt"></i></div>
-      <div class="act-icon" title="Extensions"><i class="codicon codicon-extensions"></i></div>
-      <div class="act-icon act-bottom" title="Account"><i class="codicon codicon-account"></i></div>
-      <div class="act-icon" title="Command Palette" onclick="openPalette('>')"><i class="codicon codicon-settings-gear"></i></div>
+  <div style="flex:1;display:flex;overflow:hidden;position:relative">
+
+    <div style="width:54px;flex-shrink:0;background:var(--act);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;border-right:1px solid var(--bd);z-index:25">
+      <div title="Explorador" style="width:54px;height:46px;display:flex;align-items:center;justify-content:center;color:var(--txt);box-shadow:inset 2px 0 0 var(--ac);transition:color .2s"><i class="codicon codicon-files" style="font-size:21px"></i></div>
+      <div onClick="{{ openPalette }}" title="Buscar" style="width:54px;height:46px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;transition:color .2s" style-hover="color:var(--txt)"><i class="codicon codicon-search" style="font-size:21px"></i></div>
+      <div title="Control de versiones" style="width:54px;height:46px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;transition:color .2s" style-hover="color:var(--txt)"><i class="codicon codicon-source-control" style="font-size:21px"></i></div>
+      <div onClick="{{ focusTerm }}" title="Terminal" style="width:54px;height:46px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;transition:color .2s" style-hover="color:var(--txt)"><i class="codicon codicon-terminal" style="font-size:21px"></i></div>
+      <div style="margin-top:auto;display:flex;flex-direction:column">
+        <div onClick="{{ cycleTheme }}" title="Cambiar tema" style="width:54px;height:46px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;transition:color .2s" style-hover="color:var(--txt)"><i class="codicon codicon-color-mode" style="font-size:20px"></i></div>
+        <div onClick="{{ openContact }}" title="Contacto" style="width:54px;height:46px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;transition:color .2s" style-hover="color:var(--txt)"><i class="codicon codicon-account" style="font-size:21px"></i></div>
+      </div>
     </div>
 
-    <div class="sidebar">
-      <div class="sb-head"><span>Explorer</span><i class="codicon codicon-list-selection"></i></div>
-      <div class="sb-project"><i class="codicon codicon-chevron-down"></i> WALTER-ZUNIGA</div>
-      <ul class="tree">
-        <li class="file active" onclick="openTab('readme',this)"><span style="width:14px"></span><i class="fico devicon-markdown-original"></i> README.md</li>
+    <div onClick="{{ toggleNav }}" style="display:var(--scrimd);position:absolute;inset:0;background:#05070ab8;z-index:18;animation:fade .2s ease"></div>
 
-        <li class="folder" onclick="toggleFolder(this)"><i class="chev codicon codicon-chevron-down"></i><i class="fico codicon codicon-folder-opened fico-folder"></i> about</li>
-        <ul class="nested">
-          <li class="file" onclick="openTab('whoami',this)"><i class="fico devicon-javascript-plain colored"></i> whoami.js</li>
-        </ul>
+    <div style="position:var(--sbpos);left:var(--sbl,0px);top:0;bottom:0;width:var(--sbw);flex-shrink:0;transform:translateX(var(--sbx));transition:transform .3s cubic-bezier(.2,.7,.3,1);background:var(--bg2);border-right:1px solid var(--bd);overflow-y:auto;z-index:20;box-shadow:var(--sbsh)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px">
+        <span style="font-size:10.5px;letter-spacing:.16em;color:var(--mut);text-transform:uppercase">Explorador</span>
+        <i class="codicon codicon-ellipsis" style="font-size:14px;color:var(--mut)"></i>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 16px 8px;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase">
+        <i class="codicon codicon-chevron-down" style="font-size:14px;color:var(--mut)"></i> walter-zuniga
+      </div>
 
-        <li class="folder" onclick="toggleFolder(this)"><i class="chev codicon codicon-chevron-down"></i><i class="fico codicon codicon-folder-opened fico-folder"></i> experience</li>
-        <ul class="nested">
-          <li class="file" onclick="openTab('ranco',this)"><i class="fico devicon-typescript-plain colored"></i> ranco-cherries.ts</li>
-          <li class="file" onclick="openTab('projects',this)"><i class="fico codicon codicon-json"></i> projects.json</li>
-          <li class="file" onclick="openTab('databi',this)"><i class="fico devicon-python-plain colored"></i> data-bi.py</li>
-        </ul>
+      <div style="padding:0 8px 20px;display:flex;flex-direction:column;gap:1px">
+        <div data-file="readme" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 22px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-markdown-original" style="font-size:14px;color:var(--v)"></i> README.md</div>
 
-        <li class="folder" onclick="toggleFolder(this)"><i class="chev codicon codicon-chevron-down"></i><i class="fico codicon codicon-folder-opened fico-folder"></i> skills</li>
-        <ul class="nested">
-          <li class="file" onclick="openTab('backend',this)"><i class="fico devicon-php-plain colored"></i> backend.php</li>
-          <li class="file" onclick="openTab('frontend',this)"><i class="fico devicon-vuejs-plain colored"></i> frontend.vue</li>
-          <li class="file" onclick="openTab('db',this)"><i class="fico devicon-microsoftsqlserver-plain colored"></i> databases.sql</li>
-          <li class="file" onclick="openTab('devops',this)"><i class="fico devicon-docker-plain colored"></i> devops.dockerfile</li>
-        </ul>
+        <div data-folder="sobre" onClick="{{ toggleFolder }}" style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;margin-top:6px" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-chevron-down" style="font-size:14px;color:var(--mut);transition:transform .2s"></i><i class="codicon codicon-folder-opened" style="font-size:14px;color:var(--ac)"></i> sobre-mi</div>
+        <div data-nest="sobre" style="display:flex;flex-direction:column;gap:1px;margin-left:15px;border-left:1px solid var(--bd);padding-left:2px">
+          <div data-file="perfil" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-typescript-plain" style="font-size:14px;color:var(--v)"></i> perfil.ts</div>
+        </div>
 
-        <li class="folder" onclick="toggleFolder(this)"><i class="chev codicon codicon-chevron-down"></i><i class="fico codicon codicon-folder-opened fico-folder"></i> education</li>
-        <ul class="nested">
-          <li class="file" onclick="openTab('edu',this)"><i class="fico devicon-markdown-original"></i> inacap.md</li>
-        </ul>
+        <div data-folder="exp" onClick="{{ toggleFolder }}" style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;margin-top:6px" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-chevron-down" style="font-size:14px;color:var(--mut);transition:transform .2s"></i><i class="codicon codicon-folder-opened" style="font-size:14px;color:var(--ac)"></i> experiencia</div>
+        <div data-nest="exp" style="display:flex;flex-direction:column;gap:1px;margin-left:15px;border-left:1px solid var(--bd);padding-left:2px">
+          <div data-file="ranco" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-typescript-plain" style="font-size:14px;color:var(--v)"></i> ranco-cherries.ts</div>
+        </div>
 
-        <li class="folder" onclick="toggleFolder(this)"><i class="chev codicon codicon-chevron-down"></i><i class="fico codicon codicon-folder-opened fico-folder"></i> certifications</li>
-        <ul class="nested">
-          <li class="file" onclick="openTab('certs',this)"><i class="fico devicon-markdown-original"></i> certs.md</li>
-        </ul>
+        <div data-folder="proy" onClick="{{ toggleFolder }}" style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;margin-top:6px" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-chevron-down" style="font-size:14px;color:var(--mut);transition:transform .2s"></i><i class="codicon codicon-folder-opened" style="font-size:14px;color:var(--ac)"></i> proyectos</div>
+        <div data-nest="proy" style="display:flex;flex-direction:column;gap:1px;margin-left:15px;border-left:1px solid var(--bd);padding-left:2px">
+          <div data-file="apps" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-typescript-plain" style="font-size:14px;color:var(--v)"></i> aplicaciones.ts</div>
+          <div data-file="bi" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-markdown-original" style="font-size:14px;color:var(--v)"></i> power-bi.md</div>
+        </div>
 
-        <li class="file" onclick="openTab('contact',this)"><span style="width:14px"></span><i class="fico codicon codicon-json"></i> contact.json</li>
-        <li class="file" onclick="openTab('settings',this)"><span style="width:14px"></span><i class="fico codicon codicon-settings-gear"></i> settings.json</li>
-      </ul>
+        <div data-folder="personal" onClick="{{ toggleFolder }}" style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;margin-top:6px" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-chevron-down" style="font-size:14px;color:var(--mut);transition:transform .2s"></i><i class="codicon codicon-folder-opened" style="font-size:14px;color:var(--ac)"></i> personal</div>
+        <div data-nest="personal" style="display:flex;flex-direction:column;gap:1px;margin-left:15px;border-left:1px solid var(--bd);padding-left:2px">
+          <div data-file="micomedor" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-markdown-original" style="font-size:14px;color:var(--v)"></i> micomedor.md</div>
+        </div>
+
+        <div data-folder="skills" onClick="{{ toggleFolder }}" style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;margin-top:6px" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-chevron-down" style="font-size:14px;color:var(--mut);transition:transform .2s"></i><i class="codicon codicon-folder-opened" style="font-size:14px;color:var(--ac)"></i> skills</div>
+        <div data-nest="skills" style="display:flex;flex-direction:column;gap:1px;margin-left:15px;border-left:1px solid var(--bd);padding-left:2px">
+          <div data-file="backend" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-nodejs-plain" style="font-size:14px;color:var(--s)"></i> backend.ts</div>
+          <div data-file="frontend" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-vuejs-plain" style="font-size:14px;color:var(--s)"></i> frontend.vue</div>
+          <div data-file="datos" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-postgresql-plain" style="font-size:14px;color:var(--p)"></i> datos.sql</div>
+          <div data-file="plataforma" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-docker-plain" style="font-size:14px;color:var(--p)"></i> plataforma.dockerfile</div>
+        </div>
+
+        <div data-folder="edu" onClick="{{ toggleFolder }}" style="display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;margin-top:6px" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-chevron-down" style="font-size:14px;color:var(--mut);transition:transform .2s"></i><i class="codicon codicon-folder-opened" style="font-size:14px;color:var(--ac)"></i> formacion</div>
+        <div data-nest="edu" style="display:flex;flex-direction:column;gap:1px;margin-left:15px;border-left:1px solid var(--bd);padding-left:2px">
+          <div data-file="inacap" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-markdown-original" style="font-size:14px;color:var(--v)"></i> inacap.md</div>
+          <div data-file="certs" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 14px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="devicon-markdown-original" style="font-size:14px;color:var(--v)"></i> certificaciones.md</div>
+        </div>
+
+        <div data-file="contacto" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 22px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;margin-top:6px" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-json" style="font-size:14px;color:var(--f)"></i> contacto.json</div>
+        <div data-file="settings" onClick="{{ openFile }}" style="display:flex;align-items:center;gap:8px;padding:5px 10px 5px 22px;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s" style-hover="background:var(--bg3);color:var(--txt)"><i class="codicon codicon-settings-gear" style="font-size:14px;color:var(--mut)"></i> settings.json</div>
+      </div>
     </div>
 
-    <div class="editor-area">
-      <div class="tabs" id="tabs"></div>
-      <div class="breadcrumbs" id="breadcrumbs"></div>
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
 
-      <div class="editor-main">
-        <div class="scroll" id="scroll">
-          <div class="gutter" id="gutter">1</div>
-          <div class="code" id="code">
+      <div data-tabstrip="1" style="display:flex;background:var(--bg2);height:40px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bd)">
+        <sc-for list="{{ openTabs }}" as="t" hint-placeholder-count="1">
+          <div data-tab="{{ t.id }}" onClick="{{ selectTab }}" style="display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;height:40px;flex-shrink:0;cursor:pointer;font-size:12.5px;white-space:nowrap;border-right:1px solid var(--bd);background:{{ t.bg }};color:{{ t.fg }};box-shadow:inset 0 2px 0 {{ t.bt }};transition:background .2s,color .2s">
+            <i class="{{ t.icon }}" style="font-size:14px;color:{{ t.ic }}"></i>
+            <span>{{ t.name }}</span>
+            <span data-close="{{ t.id }}" onClick="{{ closeTab }}" style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:5px;color:var(--mut);transition:background .18s,color .18s" style-hover="background:#ffffff14;color:var(--txt)"><i class="codicon codicon-close" style="font-size:11px"></i></span>
+          </div>
+        </sc-for>
+      </div>
 
-            <!-- README -->
-            <div class="pane active" id="pane-readme">
-              <h1 class="hero">Walter Zuñiga Lineros 🍒</h1>
-              <div class="hero-sub">Ingeniero en Sistemas · Desarrollador Full-Stack · Analista de Datos & BI</div>
-              <p style="max-width:680px;margin-bottom:14px;">
-                Profesional TI con <strong>+4 años</strong> liderando el ciclo completo de soluciones
-                tecnológicas: desde el levantamiento de requerimientos hasta la implementación,
-                despliegue y soporte. Combino el desarrollo de aplicaciones empresariales
-                (<span style="color:var(--orange)">PHP · Vue · Node</span>) con la ingeniería de datos
-                y Business Intelligence (<span style="color:var(--green)">Power BI · Microsoft Fabric</span>),
-                siempre con foco en la <em>trazabilidad, documentación y mejora continua</em>.
-              </p>
-              <p style="color:var(--yellow);margin-bottom:6px;">▍ Stack principal</p>
-              <div style="margin-bottom:14px;">
-                <span class="badge">PHP 7.4</span><span class="badge">JavaScript</span><span class="badge">Node.js</span>
-                <span class="badge">Vue.js</span><span class="badge">MSSQL</span><span class="badge">PostgreSQL</span>
-                <span class="badge">Power BI</span><span class="badge">Microsoft Fabric</span><span class="badge">DAX</span>
-                <span class="badge">PySpark</span><span class="badge">Docker</span><span class="badge">Portainer.io</span>
-                <span class="badge">IIS</span><span class="badge">Git / GitHub</span><span class="badge">PowerApps</span>
+      <div ref="{{ crumbRef }}" style="height:30px;flex-shrink:0;display:flex;align-items:center;gap:5px;padding:0 22px;font-size:11.5px;color:var(--mut);background:var(--bg);overflow:hidden"></div>
+
+      <div style="flex:1;display:flex;overflow:hidden;position:relative;background:var(--bg)">
+        <div ref="{{ scrollRef }}" style="flex:1;overflow:auto;display:flex;align-items:flex-start;min-width:0">
+          <div ref="{{ gutterRef }}" style="display:var(--gtd);flex-shrink:0;text-align:right;padding:26px 12px 40px 18px;color:var(--mut);font-family:var(--mono);font-size:13.5px;line-height:1.75;user-select:none;opacity:.5;min-width:52px"></div>
+          <div style="flex:1;min-width:0;padding:26px 34px 44px 8px">
+
+            <div data-pane="readme" data-preview="1" style="display:block;max-width:940px">
+              <div style="display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:22px">
+                <span style="width:22px;height:1px;background:var(--ac)"></span> Perfil profesional
               </div>
-              <p style="color:var(--yellow);margin-bottom:6px;">▍ En una línea</p>
-              <pre><span class="cm">// Ing. en Sistemas que construye software Y modela los datos que ese software genera.</span></pre>
-              <p style="color:var(--muted);margin-top:14px;">👉 Explora las carpetas del panel izquierdo, escribe <span style="color:var(--green)">help</span> en la terminal ↓ o presiona <span style="color:var(--green)">Ctrl+Shift+P</span></p>
+              <h1 style="margin:0 0 10px;font-family:var(--serif);font-weight:400;font-size:clamp(38px,5.4vw,62px);line-height:1.02;letter-spacing:-0.02em;color:var(--txt)">Walter Zuñiga Lineros</h1>
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:26px;font-size:14px;color:var(--ac)">
+                <span>Ingeniero en Sistemas</span>
+                <span style="width:4px;height:4px;border-radius:50%;background:var(--mut)"></span>
+                <span>Desarrollo Full-Stack</span>
+                <span style="width:4px;height:4px;border-radius:50%;background:var(--mut)"></span>
+                <span>Business Intelligence</span>
+              </div>
+              <p style="margin:0 0 18px;max-width:70ch;font-size:14.5px;line-height:1.85;color:var(--dim);text-wrap:pretty">
+                Construyo el software que produce el dato y luego modelo ese dato hasta convertirlo en decisión.
+                Cuatro años en la agroindustria exportadora me enseñaron que un buen sistema empieza entendiendo
+                el proceso: la fruta, el turno, el pallet, la liquidación. Por eso trabajo el recorrido completo
+                —levantamiento, aplicación, base de datos, modelo semántico y reporte— sin perder trazabilidad en el camino.
+              </p>
+              <p style="margin:0 0 34px;max-width:70ch;font-size:14.5px;line-height:1.85;color:var(--dim);text-wrap:pretty">
+                Hoy diseño plataformas propias que operan en planta y en campo, y sostengo la capa analítica que
+                acompaña la temporada entera, desde el huerto hasta el cliente en destino.
+              </p>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:38px">
+                <div style="background:var(--bg2);padding:20px 22px">
+                  <div style="font-family:var(--serif);font-size:36px;line-height:1;color:var(--txt)">4+</div>
+                  <div style="margin-top:8px;font-size:11.5px;line-height:1.5;color:var(--mut)">años en ingeniería y datos</div>
+                </div>
+                <div style="background:var(--bg2);padding:20px 22px">
+                  <div style="font-family:var(--serif);font-size:36px;line-height:1;color:var(--txt)">6</div>
+                  <div style="margin-top:8px;font-size:11.5px;line-height:1.5;color:var(--mut)">plataformas propias en producción</div>
+                </div>
+                <div style="background:var(--bg2);padding:20px 22px">
+                  <div style="font-family:var(--serif);font-size:36px;line-height:1;color:var(--txt)">35</div>
+                  <div style="margin-top:8px;font-size:11.5px;line-height:1.5;color:var(--mut)">reportes Power BI únicos, 60+ archivos</div>
+                </div>
+                <div style="background:var(--bg2);padding:20px 22px">
+                  <div style="font-family:var(--serif);font-size:36px;line-height:1;color:var(--txt)">7</div>
+                  <div style="margin-top:8px;font-size:11.5px;line-height:1.5;color:var(--mut)">dominios de negocio cubiertos</div>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px">
+                <span style="width:22px;height:1px;background:var(--ac)"></span> Stack principal
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px 32px;margin-bottom:38px">
+                <div>
+                  <div style="font-size:12px;color:var(--txt);margin-bottom:10px">Backend</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">TypeScript</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Node · Express</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Bun · Hono</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Prisma</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">PHP</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Socket.IO</span>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:12px;color:var(--txt);margin-bottom:10px">Frontend</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Vue 3 · Pinia</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Angular · RxJS</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">shadcn-vue</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">PrimeVue</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">TanStack</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">ApexCharts · ECharts</span>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:12px;color:var(--txt);margin-bottom:10px">Datos & BI</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Power BI</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">DAX</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Power Query (M)</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Microsoft Fabric</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">PostgreSQL</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">SQL Server</span>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:12px;color:var(--txt);margin-bottom:10px">Plataforma</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Docker · Portainer</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Azure AD · MSAL</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">IIS</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Git · GitHub</span>
+                    <span style="border:1px solid var(--bd);background:var(--bg2);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Service Workers</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="border-left:2px solid var(--ac);padding:4px 0 4px 20px;margin-bottom:36px">
+                <div style="font-family:var(--serif);font-size:22px;line-height:1.45;color:var(--txt);font-style:italic;max-width:52ch">«Un dato sin trazabilidad no es información: es una opinión con formato de tabla.»</div>
+              </div>
+
+              <div style="display:flex;flex-wrap:wrap;gap:10px 26px;font-size:12px;color:var(--mut)">
+                <span style="display:flex;align-items:center;gap:7px"><i class="codicon codicon-list-tree" style="font-size:13px;color:var(--ac)"></i> Recorre el árbol de archivos</span>
+                <span style="display:flex;align-items:center;gap:7px"><i class="codicon codicon-terminal" style="font-size:13px;color:var(--ac)"></i> Escribe <span style="color:var(--s)">ayuda</span> en la terminal</span>
+                <span style="display:flex;align-items:center;gap:7px"><i class="codicon codicon-search" style="font-size:13px;color:var(--ac)"></i> Ctrl+Shift+P para la paleta</span>
+              </div>
             </div>
 
-            <!-- WHOAMI -->
-            <div class="pane" id="pane-whoami">
-<pre><span class="cm">// about/whoami.js — quién soy</span>
-<span class="kw">const</span> <span class="var">walter</span> = {
-  <span class="prop">nombre</span>:      <span class="str">"Walter Bastián Zuñiga Lineros"</span>,
-  <span class="prop">rol</span>:         <span class="str">"Ingeniero en Sistemas"</span>,
-  <span class="prop">ubicacion</span>:   <span class="str">"Rancagua, Región de O'Higgins — Chile 🇨🇱"</span>,
-  <span class="prop">experiencia</span>: <span class="str">"4+ años en TI"</span>,
+            <div data-pane="perfil" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">// sobre-mi/perfil.ts — quién soy y cómo trabajo</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">export const</span> <span style="color:var(--v)">perfil</span>: <span style="color:var(--t)">Perfil</span> = {</div>
+<div style="white-space:pre">  <span style="color:var(--p)">nombre</span>:       <span style="color:var(--s)">"Walter Bastián Zuñiga Lineros"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">rol</span>:          <span style="color:var(--s)">"Ingeniero en Sistemas · Full-Stack & BI"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">base</span>:         <span style="color:var(--s)">"Rancagua, Región de O'Higgins — Chile"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">industria</span>:    <span style="color:var(--s)">"Agroindustria exportadora (cerezas y carozos)"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">experiencia</span>:  <span style="color:var(--s)">"4+ años"</span>,</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--p)">tesis</span>: <span style="color:var(--s)">`Soy un perfil híbrido por convicción, no por casualidad.</div>
+<div style="white-space:pre">    Escribo la aplicación que captura el proceso y también modelo</div>
+<div style="white-space:pre">    los datos que esa aplicación genera. Conocer los dos extremos</div>
+<div style="white-space:pre">    me permite diseñar sistemas que después son fáciles de medir,</div>
+<div style="white-space:pre">    y modelos analíticos que hablan el idioma de la operación.`</span>,</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--p)">fortalezas</span>: [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Levantamiento de requerimientos junto al usuario en planta"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Arquitectura de aplicaciones empresariales end-to-end"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Modelado de datos: transaccional y dimensional"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Business Intelligence con foco en decisión, no en gráficos"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Integración con ERPs y servicios externos"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Coordinación de proyectos con equipos internos y proveedores"</span></div>
+<div style="white-space:pre">  ],</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--p)">metodo</span>: [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Entender el proceso antes de escribir la primera línea"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Documentar lo suficiente para que otro pueda continuar"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Preferir trazabilidad explícita sobre magia implícita"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Iterar con el usuario final, no sobre supuestos"</span></div>
+<div style="white-space:pre">  ],</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--p)">habilidadesBlandas</span>: [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Traducir necesidad de negocio a solución técnica"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Comunicación clara con áreas no técnicas"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Autonomía y criterio para decidir"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Trabajo en equipo multidisciplinario"</span></div>
+<div style="white-space:pre">  ],</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--p)">idiomas</span>: { <span style="color:var(--p)">español</span>: <span style="color:var(--s)">"nativo"</span>, <span style="color:var(--p)">inglés</span>: <span style="color:var(--s)">"técnico — lectura y documentación"</span> },</div>
+<div style="white-space:pre">  <span style="color:var(--p)">modalidad</span>: [<span style="color:var(--s)">"Remoto"</span>, <span style="color:var(--s)">"Híbrido"</span>],</div>
+<div style="white-space:pre">  <span style="color:var(--p)">disponible</span>: <span style="color:var(--n)">true</span></div>
+<div style="white-space:pre">};</div>
+</pre></div>
 
-  <span class="prop">perfil</span>: <span class="str">`Perfil híbrido: desarrollador full-stack + analista de datos.
-    Me muevo con soltura entre el backend, el frontend, la base de
-    datos y la capa analítica (BI). Disfruto entender el proceso de
-    negocio completo antes de escribir una sola línea de código.`</span>,
+            <div data-pane="ranco" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">// experiencia/ranco-cherries.ts — rol actual</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">export const</span> <span style="color:var(--v)">rancoCherries</span>: <span style="color:var(--t)">Experiencia</span> = {</div>
+<div style="white-space:pre">  <span style="color:var(--p)">empresa</span>:  <span style="color:var(--s)">"Ranco Cherries"</span>,          <span style="color:var(--c)">// exportadora de cerezas 🍒</span></div>
+<div style="white-space:pre">  <span style="color:var(--p)">cargo</span>:    <span style="color:var(--s)">"Ingeniero en Sistemas"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">periodo</span>:  <span style="color:var(--s)">"Nov 2021 — Presente"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">lugar</span>:    <span style="color:var(--s)">"Rancagua, O'Higgins — Chile"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">alcance</span>:  <span style="color:var(--s)">"Multi-planta: packing, túneles de frío, campo y oficina central"</span>,</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--c)">/* Ingeniería de software ------------------------------------ */</span></div>
+<div style="white-space:pre">  <span style="color:var(--p)">ingenieria</span>: [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Liderar el ciclo completo: requerimiento → diseño → desarrollo → despliegue → soporte"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Diseñar y construir seis plataformas internas hoy en producción"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Integrar aplicaciones satélite con los ERP Frusys y CloudFruit"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Implementar autenticación dual (JWT + Azure AD) y RBAC por rol y planta"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Operar la infraestructura de contenedores con Docker y Portainer"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Sostener soluciones low-code de apoyo en Microsoft PowerApps"</span></div>
+<div style="white-space:pre">  ],</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--c)">/* Datos y Business Intelligence ------------------------------ */</span></div>
+<div style="white-space:pre">  <span style="color:var(--p)">datos</span>: [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Diseñar y mantener la plataforma de reportería: ~35 reportes en 60+ archivos"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Modelado tabular: relaciones, jerarquías y medidas DAX"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Transformación con Power Query (M), Dataflows y carga incremental"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Row-Level Security para productores y clientes externos"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"ETL en Fabric Notebooks (PySpark) sobre arquitectura Medallion"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Ciclo de validación con las áreas antes de publicar cada versión"</span></div>
+<div style="white-space:pre">  ],</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--c)">/* Gestión ---------------------------------------------------- */</span></div>
+<div style="white-space:pre">  <span style="color:var(--p)">gestion</span>: [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Coordinación de proyectos TI internos y con proveedores externos"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Planificación y seguimiento en Microsoft Planner y Teams"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Documentación técnica y funcional como parte del entregable"</span></div>
+<div style="white-space:pre">  ],</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--p)">impacto</span>: <span style="color:var(--s)">`La operación pasó de planillas y correos a sistemas con</div>
+<div style="white-space:pre">    trazabilidad de punta a punta, y de reportes puntuales a una</div>
+<div style="white-space:pre">    plataforma analítica que acompaña la temporada completa.`</span></div>
+<div style="white-space:pre">};</div>
+</pre></div>
 
-  <span class="prop">fortalezas</span>: [
-    <span class="str">"Levantamiento y análisis de requerimientos"</span>,
-    <span class="str">"Desarrollo de aplicaciones empresariales"</span>,
-    <span class="str">"Modelado de datos y Business Intelligence"</span>,
-    <span class="str">"Gestión de proyectos (internos y proveedores externos)"</span>,
-    <span class="str">"Documentación y mejora continua"</span>
-  ],
+            <div data-pane="apps" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">// proyectos/aplicaciones.ts — plataformas diseñadas y construidas end-to-end</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">export const</span> <span style="color:var(--v)">proyectos</span>: <span style="color:var(--t)">Proyecto</span>[] = [</div>
+<div style="white-space:pre">  {</div>
+<div style="white-space:pre">    <span style="color:var(--p)">nombre</span>:  <span style="color:var(--s)">"GesMat — Trazabilidad de inventario industrial"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">dominio</span>: <span style="color:var(--s)">"Materiales y envases · multi-planta"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">resumen</span>: <span style="color:var(--s)">`Ciclo de vida completo del lote: recepción, armado por</div>
+<div style="white-space:pre">      recetas, consolidación, desarme, despacho y consumo, con genealogía</div>
+<div style="white-space:pre">      end-to-end. Stock en tiempo real, RBAC y KPIs de operación.`</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">stack</span>:   [<span style="color:var(--s)">"Node"</span>, <span style="color:var(--s)">"Express"</span>, <span style="color:var(--s)">"Prisma"</span>, <span style="color:var(--s)">"PostgreSQL"</span>, <span style="color:var(--s)">"Zod"</span>,</div>
+<div style="white-space:pre">                <span style="color:var(--s)">"Vue"</span>, <span style="color:var(--s)">"Pinia"</span>, <span style="color:var(--s)">"shadcn/ui"</span>, <span style="color:var(--s)">"ApexCharts"</span>, <span style="color:var(--s)">"Azure AD"</span>, <span style="color:var(--s)">"Docker"</span>],</div>
+<div style="white-space:pre">    <span style="color:var(--p)">clave</span>:   <span style="color:var(--s)">"Genealogía de lotes reconstruible en cualquier punto de la cadena"</span></div>
+<div style="white-space:pre">  },</div>
+<div style="white-space:pre">  {</div>
+<div style="white-space:pre">    <span style="color:var(--p)">nombre</span>:  <span style="color:var(--s)">"Estimaciones Productivas"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">dominio</span>: <span style="color:var(--s)">"Campo agrícola · offline-first"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">resumen</span>: <span style="color:var(--s)">`Aplicación de estimación productiva usada en huerto, sin</div>
+<div style="white-space:pre">      cobertura garantizada: opera en local y sincroniza sola al recuperar red.`</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">stack</span>:   [<span style="color:var(--s)">"TypeScript"</span>, <span style="color:var(--s)">"Node"</span>, <span style="color:var(--s)">"Express"</span>, <span style="color:var(--s)">"PostgreSQL"</span>,</div>
+<div style="white-space:pre">                <span style="color:var(--s)">"Vue 3"</span>, <span style="color:var(--s)">"Pinia"</span>, <span style="color:var(--s)">"Dexie"</span>, <span style="color:var(--s)">"Service Workers"</span>, <span style="color:var(--s)">"Docker"</span>],</div>
+<div style="white-space:pre">    <span style="color:var(--p)">clave</span>:   <span style="color:var(--s)">"Sincronización diferida con resolución de conflictos en terreno"</span></div>
+<div style="white-space:pre">  },</div>
+<div style="white-space:pre">  {</div>
+<div style="white-space:pre">    <span style="color:var(--p)">nombre</span>:  <span style="color:var(--s)">"Tickets de Adquisiciones"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">dominio</span>: <span style="color:var(--s)">"Compras y finanzas"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">resumen</span>: <span style="color:var(--s)">`Solicitudes y órdenes de compra con aprobación multi-rol,</div>
+<div style="white-space:pre">      asociación de OC y facturas, workflow configurable y notificaciones.</div>
+<div style="white-space:pre">      Incluye módulo de análisis para consumo desde Power BI y Excel.`</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">stack</span>:   [<span style="color:var(--s)">"TypeScript"</span>, <span style="color:var(--s)">"Node"</span>, <span style="color:var(--s)">"Express"</span>, <span style="color:var(--s)">"Prisma"</span>, <span style="color:var(--s)">"PostgreSQL"</span>,</div>
+<div style="white-space:pre">                <span style="color:var(--s)">"Vue 3"</span>, <span style="color:var(--s)">"PrimeVue"</span>, <span style="color:var(--s)">"ApexCharts"</span>, <span style="color:var(--s)">"Azure AD"</span>, <span style="color:var(--s)">"Docker"</span>],</div>
+<div style="white-space:pre">    <span style="color:var(--p)">clave</span>:   <span style="color:var(--s)">"Workflow de aprobación configurable sin tocar código"</span></div>
+<div style="white-space:pre">  },</div>
+<div style="white-space:pre">  {</div>
+<div style="white-space:pre">    <span style="color:var(--p)">nombre</span>:  <span style="color:var(--s)">"Tracker de Contenedores"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">dominio</span>: <span style="color:var(--s)">"Logística internacional · aéreo y marítimo"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">resumen</span>: <span style="color:var(--s)">`Rastreo de embarques integrando Shipsgo por ETL y webhooks.</div>
+<div style="white-space:pre">      Normaliza los eventos en PostgreSQL y expone KPIs, alertas y análisis</div>
+<div style="white-space:pre">      de desempeño: puntualidad, tránsito real vs. estimado, dwell y CO₂.`</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">stack</span>:   [<span style="color:var(--s)">"TypeScript"</span>, <span style="color:var(--s)">"Bun"</span>, <span style="color:var(--s)">"Hono"</span>, <span style="color:var(--s)">"PostgreSQL"</span>, <span style="color:var(--s)">"Prisma"</span>,</div>
+<div style="white-space:pre">                <span style="color:var(--s)">"Vue 3"</span>, <span style="color:var(--s)">"TanStack"</span>, <span style="color:var(--s)">"shadcn-vue"</span>, <span style="color:var(--s)">"ApexCharts"</span>],</div>
+<div style="white-space:pre">    <span style="color:var(--p)">clave</span>:   <span style="color:var(--s)">"Un solo relato del embarque a partir de fuentes heterogéneas"</span></div>
+<div style="white-space:pre">  },</div>
+<div style="white-space:pre">  {</div>
+<div style="white-space:pre">    <span style="color:var(--p)">nombre</span>:  <span style="color:var(--s)">"Detenciones"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">dominio</span>: <span style="color:var(--s)">"Packing y túneles de frío"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">resumen</span>: <span style="color:var(--s)">`Control y análisis de paradas de planta por causal, turno y</div>
+<div style="white-space:pre">      duración. KPIs de horas pagadas vs. efectivas, utilización, top de</div>
+<div style="white-space:pre">      causales y velocidades de línea. Multi-planta con RBAC y auth dual.`</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">stack</span>:   [<span style="color:var(--s)">"Angular 16"</span>, <span style="color:var(--s)">"RxJS"</span>, <span style="color:var(--s)">"ECharts"</span>, <span style="color:var(--s)">"Node"</span>, <span style="color:var(--s)">"Express"</span>,</div>
+<div style="white-space:pre">                <span style="color:var(--s)">"PostgreSQL"</span>, <span style="color:var(--s)">"Stored Procedures"</span>, <span style="color:var(--s)">"Azure AD"</span>, <span style="color:var(--s)">"Docker"</span>],</div>
+<div style="white-space:pre">    <span style="color:var(--p)">clave</span>:   <span style="color:var(--s)">"Convertir tiempo perdido en un indicador accionable por turno"</span></div>
+<div style="white-space:pre">  },</div>
+<div style="white-space:pre">  {</div>
+<div style="white-space:pre">    <span style="color:var(--p)">nombre</span>:  <span style="color:var(--s)">"SISOR Mantención"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">dominio</span>: <span style="color:var(--s)">"Mantenimiento industrial · multi-planta"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">resumen</span>: <span style="color:var(--s)">`Gestión de tickets con ciclo BPMN y doble aprobación</div>
+<div style="white-space:pre">      (Inocuidad + Prevención), chat en tiempo real, notificaciones y KPIs</div>
+<div style="white-space:pre">      por planta. Nueve roles y autenticación dual JWT + Azure AD.`</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--p)">stack</span>:   [<span style="color:var(--s)">"Node"</span>, <span style="color:var(--s)">"Express"</span>, <span style="color:var(--s)">"SQL Server"</span>, <span style="color:var(--s)">"Socket.IO"</span>, <span style="color:var(--s)">"Vue 3"</span>,</div>
+<div style="white-space:pre">                <span style="color:var(--s)">"Pinia"</span>, <span style="color:var(--s)">"CoreUI"</span>, <span style="color:var(--s)">"Chart.js"</span>, <span style="color:var(--s)">"MSAL"</span>, <span style="color:var(--s)">"Docker"</span>],</div>
+<div style="white-space:pre">    <span style="color:var(--p)">clave</span>:   <span style="color:var(--s)">"Un proceso de mantención auditable de principio a fin"</span></div>
+<div style="white-space:pre">  }</div>
+<div style="white-space:pre">];</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)">// También coordiné como responsable TI los proyectos Gespack y CIC,</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">// y las aplicaciones satélite integradas a los ERP de exportación.</span></div>
+</pre></div>
 
-  <span class="prop">softSkills</span>: [
-    <span class="str">"Resolución de problemas"</span>, <span class="str">"Trabajo en equipo"</span>,
-    <span class="str">"Toma de decisiones"</span>, <span class="str">"Comunicación con usuarios"</span>
-  ],
+            <div data-pane="bi" data-preview="1" style="display:none;max-width:1000px">
+              <div style="display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px">
+                <span style="width:22px;height:1px;background:var(--ac)"></span> Analista y desarrollador BI
+              </div>
+              <h2 style="margin:0 0 14px;font-family:var(--serif);font-weight:400;font-size:clamp(28px,3.6vw,42px);line-height:1.1;letter-spacing:-0.015em;color:var(--txt)">Una plataforma analítica para la temporada completa</h2>
+              <p style="margin:0 0 30px;max-width:68ch;font-size:14px;line-height:1.85;color:var(--dim);text-wrap:pretty">
+                Diseño, desarrollo y soporte de más de 60 archivos y cerca de 35 reportes únicos en Power BI,
+                con versiones internas y externas servidas por Row-Level Security. Cubren la cadena entera:
+                del huerto y la línea de packing hasta la liquidación al productor y el cliente en destino.
+              </p>
 
-  <span class="prop">idiomas</span>: { <span class="prop">español</span>: <span class="str">"nativo"</span>, <span class="prop">inglés</span>: <span class="str">"técnico / lectura"</span> },
-  <span class="prop">mantra</span>: <span class="str">"Trazabilidad, mantenibilidad y mejora continua."</span>
-};
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:34px">
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-graph-line" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Comercial y liquidaciones</span></div>
+                  <div style="font-size:12.5px;line-height:1.95;color:var(--mut)">Gestión y planificación comercial<br>Comparativo de clientes (cerezas y ciruelas)<br>Liquidación final y proyección a productores<br>Cuenta corriente de productor y envases<br>Precio de venta a China</div>
+                </div>
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-shield" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Calidad e inocuidad</span></div>
+                  <div style="font-size:12.5px;line-height:1.95;color:var(--mut)">Calidad de packing y de destino<br>Contramuestras<br>Muestras de inocuidad<br>Alertas LMR</div>
+                </div>
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-package" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Logística y despacho</span></div>
+                  <div style="font-size:12.5px;line-height:1.95;color:var(--mut)">Seguimiento aéreo y marítimo<br>Despacho a clientes<br>«Dónde está mi fruta» — trazabilidad<br>Pallet puro y días de rotación</div>
+                </div>
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-server-process" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Producción y procesos</span></div>
+                  <div style="font-size:12.5px;line-height:1.95;color:var(--mut)">Control de procesos<br>Producción de packing<br>Estimación (Gesplan)<br>Tiempos de envío<br>Reportería de operaciones</div>
+                </div>
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-credit-card" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Adquisiciones y finanzas</span></div>
+                  <div style="font-size:12.5px;line-height:1.95;color:var(--mut)">Dashboard de adquisiciones<br>Flujo de pago a proveedores</div>
+                </div>
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-pulse" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Gestión, IoT y sostenibilidad</span></div>
+                  <div style="font-size:12.5px;line-height:1.95;color:var(--mut)">IoT de temperatura y humedad<br>Indicadores ambientales<br>Prevención de riesgos<br>Histórico y comparativo de temporada<br>Reportes ASOEX · usabilidad de portales · tickets TI</div>
+                </div>
+              </div>
 
-<span class="fn">console</span>.<span class="fn">log</span>(<span class="var">walter</span>.<span class="prop">mantra</span>);</pre>
+              <div style="display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px">
+                <span style="width:22px;height:1px;background:var(--ac)"></span> Capturas
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:34px">
+                <image-slot id="wz-bi-1" shape="rounded" radius="12" style="width:100%;height:210px" placeholder="Dashboard comercial"></image-slot>
+                <image-slot id="wz-bi-2" shape="rounded" radius="12" style="width:100%;height:210px" placeholder="Trazabilidad / logística"></image-slot>
+                <image-slot id="wz-bi-3" shape="rounded" radius="12" style="width:100%;height:210px" placeholder="Producción y detenciones"></image-slot>
+              </div>
+
+              <div style="border:1px solid var(--bd);border-radius:14px;padding:22px 24px;background:var(--bg2)">
+                <div style="font-size:12.5px;color:var(--txt);margin-bottom:12px">Detalle técnico</div>
+                <div style="font-size:12.5px;line-height:1.95;color:var(--mut);max-width:74ch">
+                  Modelado tabular con relaciones y medidas DAX · transformación en Power Query (M) · Row-Level Security
+                  para productores y clientes externos · actualización incremental · consultas SQL y vistas optimizadas ·
+                  soporte continuo con ciclo de validación por área · adopción de Microsoft Fabric y del formato PBIR
+                  para versionar reportes como código.
+                </div>
+              </div>
             </div>
 
-            <!-- RANCO -->
-            <div class="pane" id="pane-ranco">
-<pre><span class="cm">// experience/ranco-cherries.ts — experiencia actual</span>
-<span class="kw">export const</span> <span class="var">rancoCherries</span>: <span class="type">Experiencia</span> = {
-  <span class="prop">empresa</span>:  <span class="str">"Ranco Cherries 🍒"</span>,   <span class="cm">// Exportadora de cerezas</span>
-  <span class="prop">cargo</span>:    <span class="str">"Ingeniero en Sistemas"</span>,
-  <span class="prop">periodo</span>:  <span class="str">"Nov 2021 — Presente (4+ años)"</span>,
-  <span class="prop">lugar</span>:    <span class="str">"Rancagua, O'Higgins, Chile"</span>,
-  <span class="prop">area</span>:     <span class="str">"Ingeniería y Desarrollo TI"</span>,
+            <div data-pane="micomedor" data-preview="1" style="display:none;max-width:1000px">
+              <div style="display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px">
+                <span style="width:22px;height:1px;background:var(--ac)"></span> Proyecto personal · producto propio
+              </div>
+              <h2 style="margin:0 0 12px;font-family:var(--serif);font-weight:400;font-size:clamp(30px,3.8vw,46px);line-height:1.08;letter-spacing:-0.015em;color:var(--txt)">MiComedor</h2>
+              <p style="margin:0 0 26px;max-width:66ch;font-size:14.5px;line-height:1.85;color:var(--dim);text-wrap:pretty">
+                El comedor de planta planificado, servido y medido desde una sola aplicación. Una PWA donde el
+                comensal arma su mes desde el teléfono, la cocina valida cada retiro por QR y el supervisor
+                planifica la minuta, opera el día y mide la adhesión — sin planillas, sin listas en papel y sin
+                conteos a mano.
+              </p>
 
-  <span class="prop">desarrollo_ti</span>: [
-    <span class="str">"Liderar el ciclo completo de soluciones: requerimientos → implementación → soporte"</span>,
-    <span class="str">"Diseño y desarrollo de apps empresariales con PHP, JS, Node.js, Vue.js, MSSQL y PostgreSQL"</span>,
-    <span class="str">"Desarrollo de apps satélite integradas a ERPs de exportadoras (Frusys, CloudFruit)"</span>,
-    <span class="str">"Coordinación de proyectos: Gespack, CIC y Detenciones"</span>,
-    <span class="str">"Gestión de equipos internos y proveedores externos"</span>,
-    <span class="str">"Infraestructura con Portainer.io + Docker e IIS"</span>,
-    <span class="str">"Soporte en soluciones Low-Code (PowerApps)"</span>,
-    <span class="str">"Documentación detallada y promoción de la mejora continua"</span>
-  ],
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:14px;overflow:hidden;margin-bottom:30px">
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-device-mobile" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Comensal</span></div>
+                  <div style="font-size:12.5px;line-height:1.9;color:var(--mut)">Calendario mensual con el plato de cada día<br>Selección dentro de una ventana configurable<br>QR del día para retirar<br>Historial de 30 días y recuperación de clave</div>
+                </div>
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-verified" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Cocinero</span></div>
+                  <div style="font-size:12.5px;line-height:1.9;color:var(--mut)">Escáner por cámara o validación manual por RUT<br>Resolución inmediata: ok, duplicado, expirado<br>Panel del día: preparados, retirados, pendientes<br>Excepciones con motivo y cierre de servicio</div>
+                </div>
+                <div style="background:var(--bg2);padding:22px 24px">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><i class="codicon codicon-dashboard" style="font-size:14px;color:var(--ac)"></i><span style="font-size:12.5px;color:var(--txt)">Supervisor</span></div>
+                  <div style="font-size:12.5px;line-height:1.9;color:var(--mut)">Operación en vivo con feed de actividad<br>Minuta mensual por dieta y publicación por día<br>Catálogo de platos, áreas y comensales (CSV)<br>Reportes de adhesión, no-shows y dietas</div>
+                </div>
+              </div>
 
-  <span class="prop">analitica_bi</span>: [
-    <span class="str">"Modelado de datos con SQL, Power Query y Dataflows"</span>,
-    <span class="str">"KPIs y cálculos avanzados con DAX"</span>,
-    <span class="str">"ETL con Fabric Notebooks (PySpark)"</span>,
-    <span class="str">"Implementación de Medallion Architecture en Lakehouses"</span>,
-    <span class="str">"Reportes interactivos y colaboración con usuarios internos/externos"</span>
-  ],
+              <div style="display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px">
+                <span style="width:22px;height:1px;background:var(--ac)"></span> Capturas
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px;margin-bottom:14px">
+                <image-slot id="wz-mc-1" shape="rounded" radius="12" style="width:100%;height:250px" placeholder="Operación en vivo — supervisor"></image-slot>
+                <image-slot id="wz-mc-2" shape="rounded" radius="12" style="width:100%;height:250px" placeholder="Calendario del comensal"></image-slot>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:32px">
+                <image-slot id="wz-mc-3" shape="rounded" radius="12" style="width:100%;height:190px" placeholder="Escáner QR del cocinero"></image-slot>
+                <image-slot id="wz-mc-4" shape="rounded" radius="12" style="width:100%;height:190px" placeholder="Minuta mensual"></image-slot>
+                <image-slot id="wz-mc-5" shape="rounded" radius="12" style="width:100%;height:190px" placeholder="Reportes de adhesión"></image-slot>
+              </div>
 
-  <span class="prop">gestion</span>: <span class="str">"Planificación y seguimiento de proyectos vía Microsoft Planner"</span>
-};</pre>
+              <div style="display:flex;align-items:center;gap:10px;color:var(--mut);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px">
+                <span style="width:22px;height:1px;background:var(--ac)"></span> Decisiones de ingeniería
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px 34px;margin-bottom:32px">
+                <div>
+                  <div style="font-size:12.5px;color:var(--txt);margin-bottom:8px">Consumo único garantizado en la base</div>
+                  <div style="font-size:12.5px;line-height:1.8;color:var(--mut)">Un índice único asegura un solo retiro válido por comensal y día: la regla no depende de la lógica de la aplicación.</div>
+                </div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--txt);margin-bottom:8px">Estados derivados, sin cron</div>
+                  <div style="font-size:12.5px;line-height:1.8;color:var(--mut)">En selección, cerrado o en servicio se calculan desde la fecha y la configuración vigente. No hay tareas programadas que fallen de madrugada.</div>
+                </div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--txt);margin-bottom:8px">Doble capa de autorización</div>
+                  <div style="font-size:12.5px;line-height:1.8;color:var(--mut)">Cada ruta redirige por rol y cada función de servidor vuelve a exigirlo: la interfaz nunca es la única barrera.</div>
+                </div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--txt);margin-bottom:8px">Sesión sin JWT en el cliente</div>
+                  <div style="font-size:12.5px;line-height:1.8;color:var(--mut)">Cookies httpOnly, token con aleatoriedad criptográfica del que solo se persiste su hash SHA-256, bcrypt y recuperación de un solo uso.</div>
+                </div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--txt);margin-bottom:8px">Configuración en caliente</div>
+                  <div style="font-size:12.5px;line-height:1.8;color:var(--mut)">Ventanas de selección, horarios, corte de cambios y SMTP con plantillas se ajustan desde la app, sin redespliegue.</div>
+                </div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--txt);margin-bottom:8px">Auditoría consultable</div>
+                  <div style="font-size:12.5px;line-height:1.8;color:var(--mut)">Toda acción que afecta a otro usuario queda registrada y se revisa desde la propia aplicación.</div>
+                </div>
+              </div>
+
+              <div style="border:1px solid var(--bd);border-radius:14px;padding:22px 24px;background:var(--bg2);margin-bottom:26px">
+                <div style="font-size:12.5px;color:var(--txt);margin-bottom:12px">Stack</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">TypeScript</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">TanStack Start · React 19</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">TanStack Router · Query (SSR)</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Zod</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Prisma 7</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">PostgreSQL</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Tailwind CSS 4</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">nodemailer</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Sentry</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">Vitest</span>
+                  <span style="border:1px solid var(--bd);background:var(--bg);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11.5px">PWA instalable</span>
+                </div>
+                <div style="font-size:12.5px;line-height:1.8;color:var(--mut);max-width:72ch">
+                  Contrato de API uniforme, dominio modelado íntegramente en español y pruebas por dominio.
+                  Pensada para comedores subsidiados de 150 a 300 comensales, con tres roles de operación.
+                </div>
+              </div>
+
+              <div style="border-left:2px solid var(--ac);padding:4px 0 4px 20px">
+                <div style="font-family:var(--serif);font-size:20px;line-height:1.5;color:var(--txt);font-style:italic;max-width:54ch">«Un proyecto de fin de semana que terminó resolviendo el mismo problema que veo en planta: decisiones tomadas sobre estimaciones en lugar de datos.»</div>
+              </div>
             </div>
 
-            <!-- PROJECTS -->
-            <div class="pane" id="pane-projects">
-<pre><span class="cm">// experience/projects.json — proyectos destacados</span>
-{
-  <span class="prop">"proyectos"</span>: [
-    {
-      <span class="prop">"nombre"</span>: <span class="str">"SISOR"</span>,
-      <span class="prop">"tipo"</span>:   <span class="str">"Aplicación empresarial"</span>,
-      <span class="prop">"stack"</span>:  [<span class="str">"PHP"</span>, <span class="str">"JavaScript"</span>, <span class="str">"MSSQL"</span>],
-      <span class="prop">"rol"</span>:    <span class="str">"Diseño y desarrollo"</span>
-    },
-    {
-      <span class="prop">"nombre"</span>: <span class="str">"GesDoc"</span>,
-      <span class="prop">"tipo"</span>:   <span class="str">"Gestión documental"</span>,
-      <span class="prop">"stack"</span>:  [<span class="str">"Vue.js"</span>, <span class="str">"Node.js"</span>, <span class="str">"PostgreSQL"</span>],
-      <span class="prop">"rol"</span>:    <span class="str">"Full-Stack"</span>
-    },
-    {
-      <span class="prop">"nombre"</span>: <span class="str">"WMS Ranco"</span>,
-      <span class="prop">"tipo"</span>:   <span class="str">"Warehouse Management System"</span>,
-      <span class="prop">"stack"</span>:  [<span class="str">"Node.js"</span>, <span class="str">"Vue.js"</span>, <span class="str">"PostgreSQL"</span>],
-      <span class="prop">"rol"</span>:    <span class="str">"Desarrollo e integración logística"</span>
-    },
-    {
-      <span class="prop">"nombre"</span>: <span class="str">"Mesa de Ayuda Mantenimiento"</span>,
-      <span class="prop">"tipo"</span>:   <span class="str">"Ticketing / Helpdesk"</span>,
-      <span class="prop">"stack"</span>:  [<span class="str">"PHP"</span>, <span class="str">"MSSQL"</span>],
-      <span class="prop">"rol"</span>:    <span class="str">"Desarrollo y soporte"</span>
-    },
-    {
-      <span class="prop">"nombre"</span>: <span class="str">"Apps satélite ERP"</span>,
-      <span class="prop">"tipo"</span>:   <span class="str">"Integración con ERP Frusys y CloudFruit"</span>,
-      <span class="prop">"impacto"</span>:<span class="str">"Optimización de procesos de gestión y operación"</span>
-    },
-    { <span class="prop">"nombre"</span>: <span class="str">"Gespack"</span>,      <span class="prop">"rol"</span>: <span class="str">"Coordinación de proyecto TI"</span> },
-    { <span class="prop">"nombre"</span>: <span class="str">"CIC"</span>,          <span class="prop">"rol"</span>: <span class="str">"Gestión y planificación de proyecto"</span> },
-    { <span class="prop">"nombre"</span>: <span class="str">"Detenciones"</span>,  <span class="prop">"rol"</span>: <span class="str">"Coordinación de proyecto"</span> }
-  ]
-}</pre>
-            </div>
+            <div data-pane="backend" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">// skills/backend.ts — servidor, dominio y datos</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">export class</span> <span style="color:var(--t)">Backend</span> <span style="color:var(--k)">implements</span> <span style="color:var(--t)">Skill</span> {</div>
+<div style="white-space:pre">  <span style="color:var(--k)">readonly</span> <span style="color:var(--p)">lenguajes</span> = [<span style="color:var(--s)">"TypeScript"</span>, <span style="color:var(--s)">"JavaScript"</span>, <span style="color:var(--s)">"PHP"</span>, <span style="color:var(--s)">"Python"</span>] <span style="color:var(--k)">as const</span>;</div>
+<div style="white-space:pre">  <span style="color:var(--k)">readonly</span> <span style="color:var(--p)">runtimes</span>  = [<span style="color:var(--s)">"Node.js"</span>, <span style="color:var(--s)">"Bun"</span>];</div>
+<div style="white-space:pre">  <span style="color:var(--k)">readonly</span> <span style="color:var(--p)">frameworks</span> = [<span style="color:var(--s)">"Express"</span>, <span style="color:var(--s)">"Hono"</span>, <span style="color:var(--s)">"Prisma"</span>, <span style="color:var(--s)">"Zod"</span>, <span style="color:var(--s)">"Socket.IO"</span>];</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--k)">readonly</span> <span style="color:var(--p)">arquitectura</span> = [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"APIs REST versionadas y documentadas"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Separación por capas: dominio, servicios, acceso a datos"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Validación de contratos en el borde (Zod)"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Procesos en background: ETL, webhooks y sincronización"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Integración con ERPs y APIs de terceros"</span></div>
+<div style="white-space:pre">  ];</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--k)">readonly</span> <span style="color:var(--p)">seguridad</span> = [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Autenticación dual: JWT propio + Azure AD (MSAL)"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"RBAC granular por rol, planta y módulo"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Auditoría de acciones sensibles"</span></div>
+<div style="white-space:pre">  ];</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--f)">nivel</span>(): <span style="color:var(--t)">string</span> {</div>
+<div style="white-space:pre">    <span style="color:var(--k)">return</span> <span style="color:var(--s)">"Avanzado — sistemas propios operando en planta todos los días"</span>;</div>
+<div style="white-space:pre">  }</div>
+<div style="white-space:pre">}</div>
+</pre></div>
 
-            <!-- DATA BI -->
-            <div class="pane" id="pane-databi">
-<pre><span class="cm"># experience/data-bi.py — Analítica & Business Intelligence</span>
-<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+            <div data-pane="frontend" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">&lt;!-- skills/frontend.vue — interfaces para gente que trabaja apurada --&gt;</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">&lt;template&gt;</span></div>
+<div style="white-space:pre">  <span style="color:var(--k)">&lt;section</span> <span style="color:var(--p)">class</span>=<span style="color:var(--s)">"skills-frontend"</span><span style="color:var(--k)">&gt;</span></div>
+<div style="white-space:pre">    <span style="color:var(--k)">&lt;Skill</span> <span style="color:var(--p)">nombre</span>=<span style="color:var(--s)">"Vue 3 · Composition API"</span>  <span style="color:var(--p)">nivel</span>=<span style="color:var(--s)">"Avanzado"</span> <span style="color:var(--k)">/&gt;</span></div>
+<div style="white-space:pre">    <span style="color:var(--k)">&lt;Skill</span> <span style="color:var(--p)">nombre</span>=<span style="color:var(--s)">"Pinia · TanStack Query"</span>    <span style="color:var(--p)">nivel</span>=<span style="color:var(--s)">"Avanzado"</span> <span style="color:var(--k)">/&gt;</span></div>
+<div style="white-space:pre">    <span style="color:var(--k)">&lt;Skill</span> <span style="color:var(--p)">nombre</span>=<span style="color:var(--s)">"Angular 16 · RxJS"</span>         <span style="color:var(--p)">nivel</span>=<span style="color:var(--s)">"Sólido"</span>   <span style="color:var(--k)">/&gt;</span></div>
+<div style="white-space:pre">    <span style="color:var(--k)">&lt;Skill</span> <span style="color:var(--p)">nombre</span>=<span style="color:var(--s)">"shadcn-vue · PrimeVue · CoreUI"</span> <span style="color:var(--p)">nivel</span>=<span style="color:var(--s)">"Avanzado"</span> <span style="color:var(--k)">/&gt;</span></div>
+<div style="white-space:pre">    <span style="color:var(--k)">&lt;Skill</span> <span style="color:var(--p)">nombre</span>=<span style="color:var(--s)">"ApexCharts · ECharts · Chart.js"</span> <span style="color:var(--p)">nivel</span>=<span style="color:var(--s)">"Avanzado"</span> <span style="color:var(--k)">/&gt;</span></div>
+<div style="white-space:pre">    <span style="color:var(--k)">&lt;Skill</span> <span style="color:var(--p)">nombre</span>=<span style="color:var(--s)">"PWA offline: Dexie + Service Workers"</span> <span style="color:var(--p)">nivel</span>=<span style="color:var(--s)">"Sólido"</span> <span style="color:var(--k)">/&gt;</span></div>
+<div style="white-space:pre">  <span style="color:var(--k)">&lt;/section&gt;</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">&lt;/template&gt;</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--k)">&lt;script setup </span><span style="color:var(--p)">lang</span>=<span style="color:var(--s)">"ts"</span><span style="color:var(--k)">&gt;</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">const</span> <span style="color:var(--v)">principios</span> = [</div>
+<div style="white-space:pre">  <span style="color:var(--s)">"La pantalla se diseña para el turno de noche, no para la demo"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--s)">"Menos clics: los flujos frecuentes se resuelven en una vista"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--s)">"Componentes reutilizables y estado predecible"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--s)">"Feedback inmediato: estados de carga, error y vacío siempre definidos"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--s)">"Responsive real: la planta usa tablet y teléfono"</span></div>
+<div style="white-space:pre">];</div>
+<div style="white-space:pre"><span style="color:var(--k)">&lt;/script&gt;</span></div>
+</pre></div>
 
-<span class="kw">class</span> <span class="type">DataAnalyst</span>:
-    <span class="str">"""Perfil de Analista de Datos & BI — Power BI + Microsoft Fabric."""</span>
+            <div data-pane="datos" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">-- skills/datos.sql — modelado, motores y analítica</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">SELECT</span> dominio, herramienta, nivel, aplicacion</div>
+<div style="white-space:pre"><span style="color:var(--k)">FROM</span>   walter.competencias_datos</div>
+<div style="white-space:pre"><span style="color:var(--k)">ORDER BY</span> nivel <span style="color:var(--k)">DESC</span>;</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)">-- ┌───────────────┬──────────────────────┬───────────┬────────────────────────────────────┐</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │ Motores       │ PostgreSQL           │ Avanzado  │ Plataformas propias, WMS, tickets  │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │               │ SQL Server (T-SQL)   │ Avanzado  │ SISOR, SP, optimización de queries │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │ Modelado      │ Relacional (3NF)     │ Avanzado  │ Diseño transaccional               │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │               │ Dimensional / star   │ Avanzado  │ Modelos semánticos de Power BI     │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │ Transformación│ Power Query (M)      │ Avanzado  │ Limpieza y normalización           │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │               │ Dataflows            │ Sólido    │ Reutilización entre reportes       │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │ Cálculo       │ DAX                  │ Avanzado  │ KPIs, time intelligence, RLS       │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- │ Ingeniería    │ Fabric + PySpark     │ Sólido    │ ETL y arquitectura Medallion       │</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">-- └───────────────┴──────────────────────┴───────────┴────────────────────────────────────┘</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)">/* Arquitectura Medallion aplicada en Lakehouse ------------------- */</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">WITH</span> capas <span style="color:var(--k)">AS</span> (</div>
+<div style="white-space:pre">  <span style="color:var(--k)">SELECT</span> <span style="color:var(--s)">'bronze'</span> <span style="color:var(--k)">AS</span> capa, <span style="color:var(--s)">'Ingesta cruda, tal como llega del origen'</span> <span style="color:var(--k)">AS</span> proposito</div>
+<div style="white-space:pre">  <span style="color:var(--k)">UNION ALL SELECT</span> <span style="color:var(--s)">'silver'</span>, <span style="color:var(--s)">'Limpieza, normalización y reglas de negocio'</span></div>
+<div style="white-space:pre">  <span style="color:var(--k)">UNION ALL SELECT</span> <span style="color:var(--s)">'gold'</span>,   <span style="color:var(--s)">'Modelos y KPIs listos para el negocio'</span></div>
+<div style="white-space:pre">)</div>
+<div style="white-space:pre"><span style="color:var(--k)">SELECT</span> * <span style="color:var(--k)">FROM</span> capas;</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)">-- Certificación: SQL Server Optimización — EducacionIT, 2022</span></div>
+</pre></div>
 
-    <span class="prop">herramientas</span> = [<span class="str">"Power BI"</span>, <span class="str">"Microsoft Fabric"</span>, <span class="str">"DAX"</span>,
-                    <span class="str">"Power Query"</span>, <span class="str">"Dataflows"</span>, <span class="str">"SQL"</span>]
+            <div data-pane="plataforma" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)"># skills/plataforma.dockerfile — despliegue y operación</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">FROM</span> walter:ingeniero-en-sistemas</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)"># Contenedores y orquestación</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">RUN</span> install <span style="color:var(--s)">"Docker"</span> <span style="color:var(--s)">"Docker Compose"</span> <span style="color:var(--s)">"Portainer"</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)"># Servidores y hosting on-premise</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">RUN</span> configure <span style="color:var(--s)">"IIS"</span> <span style="color:var(--s)">"Windows Server"</span> <span style="color:var(--s)">"Nginx (reverse proxy)"</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)"># Identidad corporativa</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">ENV</span> IDENTIDAD=<span style="color:var(--s)">"Azure AD · MSAL · JWT"</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)"># Versionado, gestión y soporte</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">ENV</span> VCS=<span style="color:var(--s)">"Git · GitHub"</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">ENV</span> GESTION=<span style="color:var(--s)">"Microsoft Planner · Teams · documentación viva"</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">ENV</span> LOW_CODE=<span style="color:var(--s)">"Microsoft PowerApps"</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">ENV</span> SOPORTE=<span style="color:var(--s)">"Atención a usuario en planta y remoto"</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)"># Cómo trabajo</span></div>
+<div style="white-space:pre"><span style="color:var(--k)">LABEL</span> principios=<span style="color:var(--s)">"trazabilidad, documentación, mejora continua"</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--k)">HEALTHCHECK</span> CMD revisar --logs --usuarios --indicadores</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--k)">CMD</span> [<span style="color:var(--s)">"desplegar"</span>, <span style="color:var(--s)">"--documentado"</span>, <span style="color:var(--s)">"--monitoreado"</span>, <span style="color:var(--s)">"--reversible"</span>]</div>
+</pre></div>
 
-    <span class="kw">def</span> <span class="fn">medallion_architecture</span>(<span class="var">self</span>):
-        <span class="str">"""Implementación en Lakehouses (Fabric)."""</span>
-        <span class="kw">return</span> {
-            <span class="str">"bronze"</span>: <span class="str">"Datos crudos (raw) tal como llegan"</span>,
-            <span class="str">"silver"</span>: <span class="str">"Limpieza, normalización y estructura"</span>,
-            <span class="str">"gold"</span>:   <span class="str">"Modelos y KPIs listos para el negocio"</span>
-        }
+            <div data-pane="inacap" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)"># formacion/inacap.md</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--k)">##</span> <span style="color:var(--t)">Ingeniería en Informática</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--p)">Institución</span>  INACAP — Rancagua, Chile</div>
+<div style="white-space:pre">  <span style="color:var(--p)">Periodo</span>      2014 — 2019</div>
+<div style="white-space:pre">  <span style="color:var(--p)">Título</span>       Ingeniero en Informática</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--k)">###</span> Enfoque de la formación</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  Desarrollo de software, bases de datos, redes e infraestructura,</div>
+<div style="white-space:pre">  y gestión de proyectos de tecnología. La base que después apliqué</div>
+<div style="white-space:pre">  directamente en la industria: levantar un proceso real, modelarlo</div>
+<div style="white-space:pre">  y sostenerlo en producción.</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--c)">> El resto lo aprendí construyendo sistemas que alguien usa mañana</span></div>
+<div style="white-space:pre"><span style="color:var(--c)">> a las seis de la mañana en una planta de packing.</span></div>
+</pre></div>
 
-    <span class="kw">def</span> <span class="fn">capacidades</span>(<span class="var">self</span>):
-        <span class="kw">return</span> [
-            <span class="str">"Modelado de datos con SQL y Power Query"</span>,
-            <span class="str">"KPIs y cálculos avanzados con DAX"</span>,
-            <span class="str">"ETL con Fabric Notebooks (PySpark)"</span>,
-            <span class="str">"Reportería interactiva en Power BI"</span>,
-            <span class="str">"Colaboración con usuarios internos y externos"</span>,
-            <span class="str">"Adopción de PBIR para versionar reportes como código"</span>
-        ]
+            <div data-pane="certs" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)"># formacion/certificaciones.md</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--k)">##</span> <span style="color:var(--t)">Certificaciones y formación continua</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--f)">▸</span> <span style="color:var(--txt)">Python Avanzado</span></div>
+<div style="white-space:pre">    EducacionIT · Julio 2025</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--f)">▸</span> <span style="color:var(--txt)">SQL Server — Optimización</span></div>
+<div style="white-space:pre">    EducacionIT · Agosto 2022</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--f)">▸</span> <span style="color:var(--txt)">Manejo de Power BI</span></div>
+<div style="white-space:pre">    A&amp;C Servicios de Capacitación · Mayo 2021</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--f)">▸</span> <span style="color:var(--txt)">Formación para personas trabajadoras</span></div>
+<div style="white-space:pre">    ACHS · Julio 2025</div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre"><span style="color:var(--k)">##</span> <span style="color:var(--t)">En estudio permanente</span></div>
+<div style="white-space:pre"> </div>
+<div style="white-space:pre">  <span style="color:var(--c)">// Microsoft Fabric: Lakehouse, Dataflows Gen2 y Notebooks</span></div>
+<div style="white-space:pre">  <span style="color:var(--c)">// Formato PBIR: versionar reportes de Power BI como código</span></div>
+<div style="white-space:pre">  <span style="color:var(--c)">// IA aplicada a datos y automatización de procesos internos</span></div>
+</pre></div>
 
-<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
-    <span class="var">bi</span> = <span class="type">DataAnalyst</span>()
-    <span class="fn">print</span>(<span class="var">bi</span>.<span class="fn">medallion_architecture</span>())</pre>
-            </div>
+            <div data-pane="contacto" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">// contacto.json — conversemos</span></div>
+<div style="white-space:pre">{</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"nombre"</span>:        <span style="color:var(--s)">"Walter Zuñiga Lineros"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"rol"</span>:           <span style="color:var(--s)">"Ingeniero en Sistemas · Full-Stack & BI"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"ubicacion"</span>:     <span style="color:var(--s)">"Rancagua, Chile"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"email"</span>:         <span style="color:var(--s)">"<a href="mailto:walter.zunigalineros@gmail.com">walter.zunigalineros@gmail.com</a>"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"telefono"</span>:      <span style="color:var(--s)">"+56 9 5730 0522"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"linkedin"</span>:      <span style="color:var(--s)">"<a href="https://www.linkedin.com/in/walterzuñigalineros" target="_blank" rel="noopener">linkedin.com/in/walterzuñigalineros</a>"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"github"</span>:        <span style="color:var(--s)">"<a href="https://github.com/walterbzl" target="_blank" rel="noopener">github.com/walterbzl</a>"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"modalidad"</span>:     [<span style="color:var(--s)">"Remoto"</span>, <span style="color:var(--s)">"Híbrido"</span>],</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"disponible"</span>:    <span style="color:var(--n)">true</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"interesado_en"</span>: [</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Desarrollo full-stack de producto interno"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Business Intelligence y modelado analítico"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Ingeniería de datos sobre Fabric"</span>,</div>
+<div style="white-space:pre">    <span style="color:var(--s)">"Roles híbridos entre ingeniería y negocio"</span></div>
+<div style="white-space:pre">  ],</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"tiempo_de_respuesta"</span>: <span style="color:var(--s)">"menos de 24 horas"</span></div>
+<div style="white-space:pre">}</div>
+</pre></div>
 
-            <!-- BACKEND -->
-            <div class="pane" id="pane-backend">
-<pre><span class="cm">// skills/backend.php — desarrollo servidor</span>
-<span class="kw"><?php</span>
-<span class="kw">class</span> <span class="type">Backend</span> {
-    <span class="kw">public</span> <span class="var">$lenguajes</span> = [<span class="str">"PHP 7.4"</span>, <span class="str">"Node.js"</span>];
-    <span class="kw">public</span> <span class="var">$patrones</span>  = [<span class="str">"MVC"</span>, <span class="str">"REST APIs"</span>, <span class="str">"Arquitectura por capas"</span>];
-    <span class="kw">public</span> <span class="var">$seguridad</span> = [<span class="str">"Autenticación"</span>, <span class="str">"Multifactor Auth (MFA)"</span>];
-    <span class="kw">public</span> <span class="var">$practicas</span> = [
-        <span class="str">"Requerimientos y análisis"</span>,
-        <span class="str">"Documentación técnica"</span>,
-        <span class="str">"Mantenimiento y soporte"</span>,
-        <span class="str">"Integración con ERPs externos"</span>
-    ];
-
-    <span class="kw">public function</span> <span class="fn">nivel</span>(): <span class="type">string</span> {
-        <span class="kw">return</span> <span class="str">"Avanzado — aplicaciones empresariales en producción"</span>;
-    }
-}</pre>
-            </div>
-
-            <!-- FRONTEND -->
-            <div class="pane" id="pane-frontend">
-<pre><span class="cm"><!-- skills/frontend.vue — interfaces de usuario --></span>
-<span class="kw"><template></span>
-  <span class="kw"><section</span> <span class="prop">class</span>=<span class="str">"skills-frontend"</span><span class="kw">></span>
-    <span class="kw"><Skill</span> <span class="prop">name</span>=<span class="str">"Vue.js"</span>       <span class="prop">level</span>=<span class="str">"Avanzado"</span> <span class="kw">/></span>
-    <span class="kw"><Skill</span> <span class="prop">name</span>=<span class="str">"JavaScript"</span>  <span class="prop">level</span>=<span class="str">"Avanzado"</span> <span class="kw">/></span>
-    <span class="kw"><Skill</span> <span class="prop">name</span>=<span class="str">"HTML5 / CSS3"</span> <span class="prop">level</span>=<span class="str">"Sólido"</span> <span class="kw">/></span>
-    <span class="kw"><Skill</span> <span class="prop">name</span>=<span class="str">"PowerApps (Low-Code)"</span> <span class="prop">level</span>=<span class="str">"Intermedio"</span> <span class="kw">/></span>
-  <span class="kw"></section></span>
-<span class="kw"></template></span>
-
-<span class="kw"><script</span> <span class="prop">setup</span><span class="kw">></span>
-<span class="kw">const</span> <span class="var">enfoque</span> = [
-  <span class="str">"UIs claras orientadas al usuario final"</span>,
-  <span class="str">"Componentes reutilizables"</span>,
-  <span class="str">"Colaboración estrecha con áreas de negocio"</span>
-];
-<span class="kw"></script></span></pre>
-            </div>
-
-            <!-- DB -->
-            <div class="pane" id="pane-db">
-<pre><span class="cm">-- skills/databases.sql — bases de datos</span>
-<span class="kw">SELECT</span> motor, nivel, uso
-<span class="kw">FROM</span>   walter.databases
-<span class="kw">WHERE</span>  dominio = <span class="str">'experto'</span>
-<span class="kw">ORDER BY</span> nivel <span class="kw">DESC</span>;
-
-<span class="cm">-- ┌──────────────┬───────────┬──────────────────────────────┐</span>
-<span class="cm">-- │ MSSQL        │ Avanzado  │ Optimización, T-SQL, tuning  │</span>
-<span class="cm">-- │ PostgreSQL   │ Avanzado  │ Apps modernas y WMS          │</span>
-<span class="cm">-- │ Power Query  │ Avanzado  │ Modelado y transformación    │</span>
-<span class="cm">-- │ Data Modeling│ Avanzado  │ Star schema, relaciones      │</span>
-<span class="cm">-- └──────────────┴───────────┴──────────────────────────────┘</span>
-
-<span class="cm">-- Certificado: SQL Server Optimización (EducacionIT, 2022)</span></pre>
-            </div>
-
-            <!-- DEVOPS -->
-            <div class="pane" id="pane-devops">
-<pre><span class="cm"># skills/devops.dockerfile — infraestructura y despliegue</span>
-<span class="kw">FROM</span> walter:ingeniero-sistemas
-
-<span class="cm"># Contenedores y orquestación</span>
-<span class="kw">RUN</span> install <span class="str">"Docker"</span> <span class="str">"Portainer.io"</span>
-
-<span class="cm"># Servidores de aplicaciones</span>
-<span class="kw">RUN</span> configure <span class="str">"IIS"</span> <span class="str">"Windows Server"</span>
-
-<span class="cm"># Versionado y colaboración</span>
-<span class="kw">ENV</span> VCS=<span class="str">"Git · GitHub"</span>
-<span class="kw">ENV</span> LOW_CODE=<span class="str">"Microsoft PowerApps"</span>
-<span class="kw">ENV</span> GESTION=<span class="str">"Microsoft Planner · Teams"</span>
-<span class="kw">ENV</span> SOPORTE=<span class="str">"TeamViewer · Asistencia remota"</span>
-
-<span class="cm"># Filosofía de trabajo</span>
-<span class="kw">LABEL</span> principios=<span class="str">"trazabilidad, documentación, mejora continua"</span>
-
-<span class="kw">CMD</span> [<span class="str">"deploy"</span>, <span class="str">"--documentado"</span>, <span class="str">"--monitoreado"</span>]</pre>
-            </div>
-
-            <!-- EDUCATION -->
-            <div class="pane" id="pane-edu">
-<pre><span class="cm"># education/inacap.md</span>
-
-<span class="kw">##</span> <span class="type">Formación Académica</span>
-
-<span class="num">🎓</span> <strong>Ingeniería en Informática</strong>
-   INACAP — Rancagua, Chile
-   <span class="cm">2014 — 2019 (5 años)</span>
-
-   Formación integral en desarrollo de software, bases de
-   datos, redes, infraestructura y gestión de proyectos TI.</pre>
-            </div>
-
-            <!-- CERTS -->
-            <div class="pane" id="pane-certs">
-<pre><span class="cm"># certifications/certs.md</span>
-
-<span class="kw">##</span> <span class="type">Certificaciones & Formación</span>
-
-<span class="num">✔</span> <strong>Python Avanzado</strong>
-   EducacionIT · Jul 2025
-
-<span class="num">✔</span> <strong>SQL Server Optimización</strong>
-   EducacionIT · Ago 2022
-
-<span class="num">✔</span> <strong>Manejo de Power BI</strong>
-   A&C Servicios de Capacitación · May 2021
-
-<span class="num">✔</span> <strong>Formación para personas trabajadoras</strong>
-   ACHS · Jul 2025
-
-<span class="cm">// En constante actualización sobre Microsoft Fabric,</span>
-<span class="cm">// Agentic AI aplicada a datos y el nuevo formato PBIR.</span></pre>
-            </div>
-
-            <!-- CONTACT -->
-            <div class="pane" id="pane-contact">
-<pre><span class="cm">// contact.json — hablemos</span>
-{
-  <span class="prop">"nombre"</span>:    <span class="str">"Walter Zuñiga Lineros"</span>,
-  <span class="prop">"rol"</span>:       <span class="str">"Ingeniero en Sistemas"</span>,
-  <span class="prop">"linkedin"</span>:  <span class="str">"linkedin.com/in/walterzuñigalineros"</span>,
-  <span class="prop">"ubicacion"</span>: <span class="str">"Rancagua, Chile 🇨🇱"</span>,
-  <span class="prop">"email"</span>:     <span class="str">"walter.zunigalineros@gmail.com"</span>,
-  <span class="prop">"telefono"</span>:  <span class="str">"+569 57300522"</span>,
-  <span class="prop">"github"</span>:    <span class="str">"github.com/walterbzl"</span>,
-  <span class="prop">"disponible"</span>: <span class="kw">true</span>,
-  <span class="prop">"Modalidad "</span>: <span class="kw">Remoto/Hibrido</span>,
-  <span class="prop">"open_to"</span>:   [<span class="str">"Desarrollo TI"</span>, <span class="str">"Business Intelligence"</span>, <span class="str">"Data Engineering"</span>]
-}</pre>
-            </div>
-
-            <!-- SETTINGS -->
-            <div class="pane" id="pane-settings">
-<pre><span class="cm">// settings.json</span>
-{
-  <span class="prop">"workbench.colorTheme"</span>: <span class="str">"Dracula"</span>,
-  <span class="prop">"editor.fontFamily"</span>:    <span class="str">"Cascadia Code, Cascadia Mono"</span>,
-  <span class="prop">"editor.fontLigatures"</span>: <span class="kw">true</span>,
-  <span class="prop">"terminal.integrated.shell.windows"</span>: <span class="str">"PowerShell / Windows Terminal"</span>,
-  <span class="prop">"walter.os"</span>:             <span class="str">"Windows 11"</span>,
-  <span class="prop">"walter.openToWork"</span>:     <span class="kw">true Remoto/Hibrido </span>,
-  <span class="prop">"walter.favoriteFruit"</span>:  <span class="str">"🍒"</span>
-}</pre>
-            </div>
+            <div data-pane="settings" style="display:none"><pre style="margin:0;font-family:var(--mono);font-size:13.5px;line-height:1.75">
+<div style="white-space:pre"><span style="color:var(--c)">// settings.json — preferencias del entorno</span></div>
+<div style="white-space:pre">{</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"workbench.colorTheme"</span>:   <span style="color:var(--s)">"Obsidiana"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"editor.fontFamily"</span>:      <span style="color:var(--s)">"JetBrains Mono"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"editor.fontLigatures"</span>:   <span style="color:var(--n)">true</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"editor.formatOnSave"</span>:    <span style="color:var(--n)">true</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"terminal.shell"</span>:         <span style="color:var(--s)">"PowerShell · Windows Terminal"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"walter.os"</span>:              [<span style="color:var(--s)">"Windows 11"</span>, <span style="color:var(--s)">"Linux (contenedores)"</span>],</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"walter.modalidad"</span>:       [<span style="color:var(--s)">"Remoto"</span>, <span style="color:var(--s)">"Híbrido"</span>],</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"walter.disponibilidad"</span>:  <span style="color:var(--s)">"Abierto a nuevas oportunidades"</span>,</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"walter.principios"</span>:      [<span style="color:var(--s)">"Trazabilidad"</span>, <span style="color:var(--s)">"Documentación"</span>, <span style="color:var(--s)">"Mejora continua"</span>],</div>
+<div style="white-space:pre">  <span style="color:var(--p)">"walter.industria"</span>:       <span style="color:var(--s)">"Agroindustria exportadora 🍒"</span></div>
+<div style="white-space:pre">}</div>
+</pre></div>
 
           </div>
         </div>
-        <div class="minimap" id="minimap"><div class="mm-view"></div></div>
+        <div ref="{{ mmRef }}" style="display:var(--mmd);width:78px;flex-shrink:0;background:var(--bg);border-left:1px solid var(--bd);padding:26px 8px;overflow:hidden;position:relative"></div>
       </div>
 
-      <div class="terminal">
-        <div class="term-head"><span class="active">TERMINAL</span><span>PROBLEMS</span><span>OUTPUT</span><span>DEBUG CONSOLE</span></div>
-        <div class="term-body" id="term-body" onclick="document.getElementById('term-input').focus()">
-          <div class="line"><span class="path">walter@portfolio</span>:<span class="prompt">~$</span> whoami</div>
-          <div class="line">Ingeniero en Sistemas · Full-Stack + Data & BI 🍒</div>
-          <div class="line" style="color:var(--muted)">Escribe <span style="color:var(--green)">help</span> para ver los comandos · <span style="color:var(--green)">Tab</span> autocompleta · <span style="color:var(--green)">Ctrl+Shift+P</span> abre la paleta.</div>
-          <div class="line" id="term-current"><span class="path">walter@portfolio</span>:<span class="prompt">~$</span> <input id="term-input" autofocus autocomplete="off" onkeydown="runCmd(event)"></div>
+      <div style="display:var(--termd);height:184px;flex-shrink:0;flex-direction:column;background:var(--bg2);border-top:1px solid var(--bd)">
+        <div style="display:flex;gap:22px;padding:9px 22px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--bd)">
+          <span style="color:var(--txt);box-shadow:inset 0 -1px 0 var(--ac);padding-bottom:8px">Terminal</span>
+          <span>Problemas</span><span>Salida</span><span>Depuración</span>
+        </div>
+        <div ref="{{ termRef }}" onClick="{{ focusTerm }}" style="flex:1;padding:12px 22px 16px;overflow-y:auto;font-size:12.5px;line-height:1.7;color:var(--dim)">
+          <sc-for list="{{ termLines }}" as="l" hint-placeholder-count="3">
+            <div style="display:flex;gap:8px;white-space:pre-wrap;color:{{ l.color }}"><span style="color:var(--s);flex-shrink:0">{{ l.prompt }}</span><span>{{ l.text }}</span></div>
+          </sc-for>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:2px">
+            <span style="color:var(--s);flex-shrink:0">walter@portafolio ~ $</span>
+            <input ref="{{ inputRef }}" onKeyDown="{{ termKey }}" autocomplete="off" spellcheck="false" placeholder="ayuda" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--txt);font-family:var(--mono);font-size:12.5px">
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="statusbar">
-    <span class="seg" onclick="openPalette('>')"><i class="codicon codicon-source-control"></i> main</span>
-    <span class="seg"><i class="codicon codicon-error"></i> 0 <i class="codicon codicon-warning"></i> 0</span>
-    <div class="right">
-      <span class="seg" id="theme-seg" onclick="openPalette('>theme')"><i class="codicon codicon-color-mode"></i> Dracula</span>
-      <span class="seg">Cascadia Code</span><span class="seg">UTF-8</span>
-      <span class="seg" id="lncol">Ln 1, Col 1</span><span class="seg">🍒 Ranco Cherries</span>
+  <div style="height:28px;flex-shrink:0;display:flex;align-items:center;gap:20px;padding:0 16px;background:var(--bg2);border-top:1px solid var(--bd);font-size:11.5px;color:var(--dim)">
+    <span style="display:flex;align-items:center;gap:6px;color:var(--ac)"><i class="codicon codicon-source-control" style="font-size:13px"></i> main</span>
+    <span style="display:flex;align-items:center;gap:6px"><i class="codicon codicon-error" style="font-size:12px"></i> 0 <i class="codicon codicon-warning" style="font-size:12px;margin-left:6px"></i> 0</span>
+    <span style="display:flex;align-items:center;gap:6px;color:var(--mut)"><i class="codicon codicon-organization" style="font-size:12px"></i> Ranco Cherries 🍒</span>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:20px">
+      <span ref="{{ themeRef }}" onClick="{{ cycleTheme }}" style="display:flex;align-items:center;gap:6px;cursor:pointer;transition:color .2s" style-hover="color:var(--txt)"><i class="codicon codicon-color-mode" style="font-size:12px"></i> Obsidiana</span>
+      <span style="color:var(--mut)">UTF-8</span>
+      <span ref="{{ lnRef }}" style="color:var(--mut)">Ln 1, Col 1</span>
+      <span style="display:flex;align-items:center;gap:6px;color:var(--mut)"><i class="codicon codicon-check-all" style="font-size:12px"></i> Disponible</span>
+    </span>
+  </div>
+
+  <sc-if value="{{ palOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ palBackdrop }}" style="position:fixed;inset:0;background:#05070ab0;backdrop-filter:blur(3px);z-index:60;display:flex;justify-content:center;align-items:flex-start;padding:78px 20px 20px;animation:fade .18s ease">
+      <div style="width:640px;max-width:100%;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;box-shadow:0 30px 80px #000000a0;overflow:hidden;animation:pop .22s cubic-bezier(.2,.7,.3,1)">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd)">
+          <i class="codicon codicon-search" style="font-size:14px;color:var(--mut)"></i>
+          <input ref="{{ palRef }}" onInput="{{ palInput }}" onKeyDown="{{ palKey }}" placeholder="Busca un archivo, o escribe > para comandos" autocomplete="off" spellcheck="false" style="flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-family:var(--mono);font-size:13px">
+        </div>
+        <div style="max-height:340px;overflow-y:auto;padding:6px">
+          <sc-for list="{{ palItems }}" as="it" hint-placeholder-count="4">
+            <div data-pal="{{ it.idx }}" onClick="{{ palRun }}" onMouseEnter="{{ palHover }}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:12.5px;background:{{ it.bg }};color:{{ it.fg }}">
+              <i class="{{ it.icon }}" style="font-size:14px;color:{{ it.ic }}"></i>
+              <span>{{ it.label }}</span>
+              <span style="margin-left:auto;color:var(--mut);font-size:11px">{{ it.sub }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
     </div>
-  </div>
+  </sc-if>
 </div>
 
-<!-- Command Palette -->
-<div class="palette-overlay" id="palette" onclick="if(event.target===this)closePalette()">
-  <div class="palette">
-    <input id="pal-input" placeholder="Escribe el nombre de un archivo, o '>' para comandos..." oninput="renderPalette()" onkeydown="paletteKey(event)">
-    <div class="palette-list" id="pal-list"></div>
-  </div>
-</div>
-
-<script>
-  function toggleFolder(el){ el.classList.toggle('collapsed'); }
-
-  const meta={
-    readme:{icon:'devicon-markdown-original', name:'README.md', crumbs:['README.md']},
-    whoami:{icon:'devicon-javascript-plain colored', name:'whoami.js', crumbs:['about','whoami.js']},
-    ranco:{icon:'devicon-typescript-plain colored', name:'ranco-cherries.ts', crumbs:['experience','ranco-cherries.ts']},
-    projects:{icon:'codicon codicon-json', name:'projects.json', crumbs:['experience','projects.json']},
-    databi:{icon:'devicon-python-plain colored', name:'data-bi.py', crumbs:['experience','data-bi.py']},
-    backend:{icon:'devicon-php-plain colored', name:'backend.php', crumbs:['skills','backend.php']},
-    frontend:{icon:'devicon-vuejs-plain colored', name:'frontend.vue', crumbs:['skills','frontend.vue']},
-    db:{icon:'devicon-microsoftsqlserver-plain colored', name:'databases.sql', crumbs:['skills','databases.sql']},
-    devops:{icon:'devicon-docker-plain colored', name:'devops.dockerfile', crumbs:['skills','devops.dockerfile']},
-    edu:{icon:'devicon-markdown-original', name:'inacap.md', crumbs:['education','inacap.md']},
-    certs:{icon:'devicon-markdown-original', name:'certs.md', crumbs:['certifications','certs.md']},
-    contact:{icon:'codicon codicon-json', name:'contact.json', crumbs:['contact.json']},
-    settings:{icon:'codicon codicon-settings-gear', name:'settings.json', crumbs:['settings.json']}
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;tema&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;obsidiana&quot;,&quot;cobalto&quot;,&quot;papel&quot;],&quot;default&quot;:&quot;obsidiana&quot;,&quot;tsType&quot;:&quot;'obsidiana'|'cobalto'|'papel'&quot;,&quot;section&quot;:&quot;Apariencia&quot;},&quot;acento&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;options&quot;:[&quot;#e0b384&quot;,&quot;#9dc6e2&quot;,&quot;#a8cdb3&quot;,&quot;#dba6b4&quot;],&quot;default&quot;:&quot;#e0b384&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Apariencia&quot;},&quot;minimapa&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Editor&quot;}}">
+class Component extends DCLogic {
+  meta = {
+    readme:{n:'README.md', i:'devicon-markdown-original', c:'var(--v)', crumbs:['README.md']},
+    perfil:{n:'perfil.ts', i:'devicon-typescript-plain', c:'var(--v)', crumbs:['sobre-mi','perfil.ts']},
+    ranco:{n:'ranco-cherries.ts', i:'devicon-typescript-plain', c:'var(--v)', crumbs:['experiencia','ranco-cherries.ts']},
+    apps:{n:'aplicaciones.ts', i:'devicon-typescript-plain', c:'var(--v)', crumbs:['proyectos','aplicaciones.ts']},
+    bi:{n:'power-bi.md', i:'devicon-markdown-original', c:'var(--v)', crumbs:['proyectos','power-bi.md']},
+    micomedor:{n:'micomedor.md', i:'devicon-markdown-original', c:'var(--v)', crumbs:['personal','micomedor.md']},
+    backend:{n:'backend.ts', i:'devicon-nodejs-plain', c:'var(--s)', crumbs:['skills','backend.ts']},
+    frontend:{n:'frontend.vue', i:'devicon-vuejs-plain', c:'var(--s)', crumbs:['skills','frontend.vue']},
+    datos:{n:'datos.sql', i:'devicon-postgresql-plain', c:'var(--p)', crumbs:['skills','datos.sql']},
+    plataforma:{n:'plataforma.dockerfile', i:'devicon-docker-plain', c:'var(--p)', crumbs:['skills','plataforma.dockerfile']},
+    inacap:{n:'inacap.md', i:'devicon-markdown-original', c:'var(--v)', crumbs:['formacion','inacap.md']},
+    certs:{n:'certificaciones.md', i:'devicon-markdown-original', c:'var(--v)', crumbs:['formacion','certificaciones.md']},
+    contacto:{n:'contacto.json', i:'codicon codicon-json', c:'var(--f)', crumbs:['contacto.json']},
+    settings:{n:'settings.json', i:'codicon codicon-settings-gear', c:'var(--mut)', crumbs:['settings.json']}
   };
-  const files=Object.keys(meta);
-  const themes=['dracula','light','monokai'];
-  const themeLabel={dracula:'Dracula',light:'Light+',monokai:'Monokai'};
 
-  /* ---------- Tabs ---------- */
-  function openTab(id){
-    if(!document.querySelector('.tab[data-id="'+id+'"]')){
-      const m=meta[id];
-      const t=document.createElement('div');
-      t.className='tab'; t.dataset.id=id;
-      t.innerHTML='<i class="fico '+m.icon+'"></i> '+m.name+
-        ' <span class="x" onclick="closeTab(event,\''+id+'\')">'+
-        '<i class="codicon codicon-close close-ic"></i><span class="dot">●</span></span>';
-      t.onclick=()=>switchTab(id);
-      document.getElementById('tabs').appendChild(t);
-    }
-    switchTab(id);
-    saveState();
+  themes = {
+    obsidiana:{ label:'Obsidiana', v:{'--bg':'#0f1115','--bg2':'#0b0d11','--bg3':'#171b22','--act':'#08090c','--bd':'#1b202a','--txt':'#e7e9ed','--dim':'#98a0ab','--mut':'#5c6470','--sel':'#1e2530','--k':'#c8a6e9','--s':'#a8cdb3','--v':'#9dc6e2','--f':'#e5c48f','--t':'#e0b384','--n':'#dba6b4','--p':'#a9c6e8','--c':'#5c6470','--ac':'#e0b384','--ac2':'#9dc6e2'} },
+    cobalto:{ label:'Cobalto', v:{'--bg':'#0b1220','--bg2':'#08101c','--bg3':'#152238','--act':'#060c16','--bd':'#16233a','--txt':'#e3e9f2','--dim':'#93a2b8','--mut':'#5e6d84','--sel':'#17253c','--k':'#a9b9f2','--s':'#8fd0c0','--v':'#8fbdf0','--f':'#e6c98f','--t':'#e6c98f','--n':'#e0a3b8','--p':'#9fc0e8','--c':'#5e6d84','--ac':'#8fbdf0','--ac2':'#e6c98f'} },
+    papel:{ label:'Papel', v:{'--bg':'#fbfaf8','--bg2':'#f4f2ee','--bg3':'#e9e6e0','--act':'#26241f','--bd':'#e2ded6','--txt':'#22201c','--dim':'#55524b','--mut':'#8e8a80','--sel':'#e6e2da','--k':'#7f4aa6','--s':'#3d7550','--v':'#2b6a97','--f':'#8f6318','--t':'#8f6318','--n':'#a34059','--p':'#2b5c97','--c':'#8e8a80','--ac':'#9a6a2c','--ac2':'#2b6a97'} }
+  };
+
+  state = {
+    tabs:['readme'], active:'readme', pal:false, palSel:0, palQ:'', nav:false,
+    theme:'obsidiana',
+    term:[
+      {prompt:'walter@portafolio ~ $', text:'whoami', color:'var(--txt)'},
+      {prompt:'', text:'Walter Zuñiga Lineros — Ingeniero en Sistemas · Full-Stack & Business Intelligence', color:'var(--dim)'},
+      {prompt:'', text:'Escribe «ayuda» para ver los comandos disponibles. Tab autocompleta.', color:'var(--mut)'}
+    ]
+  };
+
+  rootRef = React.createRef();
+  scrollRef = React.createRef();
+  gutterRef = React.createRef();
+  mmRef = React.createRef();
+  crumbRef = React.createRef();
+  termRef = React.createRef();
+  inputRef = React.createRef();
+  palRef = React.createRef();
+  themeRef = React.createRef();
+  lnRef = React.createRef();
+
+  cmds = ['ayuda','whoami','ls','abrir','proyectos','bi','micomedor','skills','contacto','tema','limpiar'];
+
+  componentDidMount(){
+    const saved = (() => { try { return localStorage.getItem('wz3_theme'); } catch(e){ return null; } })();
+    const th = this.props.tema || saved || 'obsidiana';
+    this.setState({ theme: this.themes[th] ? th : 'obsidiana' }, () => this.applyTheme());
+    this.onResize = () => this.applyLayout();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = (e) => {
+      const k = (e.key || '').toLowerCase();
+      if((e.ctrlKey || e.metaKey) && e.shiftKey && k === 'p'){ e.preventDefault(); this.openPal('>'); }
+      else if((e.ctrlKey || e.metaKey) && !e.shiftKey && k === 'p'){ e.preventDefault(); this.openPal(''); }
+      else if(k === 'escape' && this.state.pal){ this.setState({ pal:false }); }
+    };
+    document.addEventListener('keydown', this.onKey);
+    this.onScroll = () => {
+      const el = this.scrollRef.current, ln = this.lnRef.current;
+      if(el && ln) ln.textContent = 'Ln ' + (Math.floor(el.scrollTop / 24) + 1) + ', Col 1';
+    };
+    if(this.scrollRef.current) this.scrollRef.current.addEventListener('scroll', this.onScroll);
+    this.applyLayout();
+    this.sync();
   }
 
-  function switchTab(id){
-    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.id===id));
-    document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
-    const pane=document.getElementById('pane-'+id);
-    if(pane){ pane.classList.remove('active'); void pane.offsetWidth; pane.classList.add('active'); }
-    document.querySelectorAll('.file').forEach(f=>{
-      const oc=f.getAttribute('onclick')||'';
-      f.classList.toggle('active', oc.includes("'"+id+"'"));
+  componentWillUnmount(){
+    window.removeEventListener('resize', this.onResize);
+    document.removeEventListener('keydown', this.onKey);
+    if(this.scrollRef.current) this.scrollRef.current.removeEventListener('scroll', this.onScroll);
+  }
+
+  componentDidUpdate(){ this.refresh(); }
+
+  refresh(){
+    this.applyTheme();
+    this.applyLayout();
+    this.sync();
+  }
+
+  applyTheme(){
+    const r = this.rootRef.current; if(!r) return;
+    const th = this.themes[this.state.theme] || this.themes.obsidiana;
+    Object.keys(th.v).forEach(k => r.style.setProperty(k, th.v[k]));
+    if(this.props.acento) r.style.setProperty('--ac', this.props.acento);
+    document.body.style.background = th.v['--bg'];
+    if(this.themeRef.current){
+      this.themeRef.current.innerHTML = '<i class="codicon codicon-color-mode" style="font-size:12px"></i> ' + th.label;
+    }
+    try { localStorage.setItem('wz3_theme', this.state.theme); } catch(e){}
+    this.buildMinimap();
+  }
+
+  applyLayout(){
+    const r = this.rootRef.current; if(!r) return;
+    const w = window.innerWidth;
+    const mobile = w <= 780;
+    const set = (k, v) => r.style.setProperty(k, v);
+    const mm = this.props.minimapa === false ? false : true;
+    const ap = this.activePane();
+    const preview = !!(ap && ap.dataset.preview === '1');
+    if(mobile){
+      set('--sbpos','absolute'); set('--sbl','54px'); set('--sbw','266px'); set('--navd','flex');
+      set('--sbx', this.state.nav ? '0px' : '-330px');
+      set('--scrimd', this.state.nav ? 'block' : 'none');
+      set('--sbsh','24px 0 60px #04060ac0');
+      set('--mmd','none'); set('--gtd','none'); set('--termd','none');
+    } else {
+      set('--sbpos','relative'); set('--sbl','0px'); set('--sbw','272px'); set('--navd','none');
+      set('--sbx','0px'); set('--scrimd','none'); set('--sbsh','none');
+      set('--mmd', mm && w > 1080 ? 'block' : 'none');
+      set('--gtd', (!preview && w > 900) ? 'block' : 'none');
+      set('--termd','flex');
+    }
+  }
+
+  activePane(){
+    const r = this.rootRef.current; if(!r) return null;
+    return r.querySelector('[data-pane="' + this.state.active + '"]');
+  }
+
+  sync(){
+    const r = this.rootRef.current; if(!r) return;
+    const id = this.state.active;
+    const changed = this._lastSync !== id;
+    this._lastSync = id;
+    if(!changed && r.querySelector('[data-pane="' + id + '"]') && r.querySelector('[data-pane="' + id + '"]').style.display === 'block') return;
+    r.querySelectorAll('[data-pane]').forEach(p => {
+      const on = p.dataset.pane === id;
+      p.style.display = on ? 'block' : 'none';
+      if(on){ p.style.animation = 'none'; void p.offsetWidth; p.style.animation = 'rise .34s cubic-bezier(.2,.7,.3,1)'; }
     });
-    buildGutter(pane);
-    buildMinimap(pane);
-    buildBreadcrumbs(id);
-    document.getElementById('scroll').scrollTop=0;
-    saveState();
+    r.querySelectorAll('[data-file]').forEach(f => {
+      const on = f.dataset.file === id;
+      f.style.background = on ? 'var(--sel)' : 'transparent';
+      f.style.color = on ? 'var(--txt)' : 'var(--dim)';
+      f.style.boxShadow = on ? 'inset 2px 0 0 var(--ac)' : 'none';
+    });
+    this.applyLayout();
+    this.buildGutter();
+    this.buildMinimap();
+    this.buildCrumbs();
+    if(this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
+    if(this.lnRef.current) this.lnRef.current.textContent = 'Ln 1, Col 1';
   }
 
-  function closeTab(e,id){
-    e.stopPropagation();
-    const tab=document.querySelector('.tab[data-id="'+id+'"]');
-    const wasActive=tab.classList.contains('active');
-    tab.remove();
-    if(wasActive){
-      const remaining=document.querySelector('.tab');
-      if(remaining) switchTab(remaining.dataset.id);
-      else { document.getElementById('gutter').innerHTML=''; document.getElementById('breadcrumbs').innerHTML=''; }
-    }
-    saveState();
+  lines(){
+    const p = this.activePane();
+    if(!p) return [];
+    const pre = p.querySelector('pre');
+    if(pre && pre.children.length) return Array.prototype.map.call(pre.children, c => c.textContent || '');
+    return (p.innerText || '').replace(/\n+$/, '').split('\n');
   }
 
-  /* ---------- Gutter / Minimap / Breadcrumbs ---------- */
-  function paneLines(pane){
-    if(!pane) return [];
-    return pane.innerText.replace(/\n+$/,'').split('\n');
+  buildGutter(){
+    const g = this.gutterRef.current; if(!g) return;
+    const n = this.lines().length;
+    let out = '';
+    for(let i = 1; i <= n; i++) out += i + '<br>';
+    g.innerHTML = out;
   }
-  function buildGutter(pane){
-    const lines=paneLines(pane);
-    const g=document.getElementById('gutter');
-    g.innerHTML=lines.map((_,i)=>i+1).join('<br>');
+
+  buildMinimap(){
+    const mm = this.mmRef.current; if(!mm) return;
+    const ls = this.lines().slice(0, 220);
+    mm.innerHTML = '<div style="position:absolute;left:0;right:0;top:26px;height:72px;background:#ffffff08;border-top:1px solid #ffffff12;border-bottom:1px solid #ffffff12"></div>' +
+      ls.map(l => {
+        const t = l.trim();
+        const w = Math.max(6, Math.min(100, t.length * 1.5));
+        const op = t.startsWith('//') || t.startsWith('--') || t.startsWith('#') ? .18 : .34;
+        return '<div style="height:2px;margin-bottom:2px;border-radius:1px;background:var(--dim);opacity:' + op + ';width:' + w + '%"></div>';
+      }).join('');
   }
-  function buildMinimap(pane){
-    const lines=paneLines(pane);
-    const mm=document.getElementById('minimap');
-    mm.innerHTML='<div class="mm-view"></div>'+lines.map(l=>{
-      const w=Math.max(4,Math.min(100,l.trim().length*1.6));
-      return '<div class="mm-line" style="width:'+w+'%"></div>';
+
+  buildCrumbs(){
+    const bc = this.crumbRef.current; if(!bc) return;
+    const m = this.meta[this.state.active]; if(!m){ bc.innerHTML = ''; return; }
+    bc.innerHTML = m.crumbs.map((c, i) => {
+      const last = i === m.crumbs.length - 1;
+      const ico = last
+        ? '<i class="' + m.i + '" style="font-size:12px;color:' + m.c + '"></i>'
+        : '<i class="codicon codicon-folder" style="font-size:12px;color:var(--ac)"></i>';
+      return '<span style="display:flex;align-items:center;gap:6px;' + (last ? 'color:var(--dim)' : '') + '">' + ico + ' ' + c + '</span>' +
+        (last ? '' : '<i class="codicon codicon-chevron-right" style="font-size:12px;opacity:.6"></i>');
     }).join('');
   }
-  function buildBreadcrumbs(id){
-    const bc=document.getElementById('breadcrumbs');
-    const m=meta[id]; if(!m){ bc.innerHTML=''; return; }
-    const parts=m.crumbs;
-    let html='';
-    parts.forEach((p,i)=>{
-      const isFile=i===parts.length-1;
-      const ico=isFile?'<i class="fico '+m.icon+'"></i>':'<i class="fico codicon codicon-folder fico-folder"></i>';
-      html+='<span class="crumb">'+ico+' '+p+'</span>';
-      if(!isFile) html+='<i class="sep codicon codicon-chevron-right"></i>';
-    });
-    bc.innerHTML=html;
+
+  open(id){
+    if(!this.meta[id]) return;
+    const tabs = this.state.tabs.includes(id) ? this.state.tabs : this.state.tabs.concat([id]);
+    this.setState({ tabs, active:id, nav:false, pal:false }, () => this.refresh());
   }
 
-  /* ---------- Theme ---------- */
-  function setTheme(name){
-    if(name==='dracula') document.body.removeAttribute('data-theme');
-    else document.body.setAttribute('data-theme',name);
-    document.getElementById('theme-seg').innerHTML='<i class="codicon codicon-color-mode"></i> '+themeLabel[name];
-    localStorage.setItem('wz_theme',name);
-    const active=document.querySelector('.tab.active');
-    if(active) buildMinimap(document.getElementById('pane-'+active.dataset.id));
-  }
-
-  /* ---------- State persistence ---------- */
-  function saveState(){
-    const tabs=[...document.querySelectorAll('.tab')].map(t=>t.dataset.id);
-    const active=document.querySelector('.tab.active');
-    localStorage.setItem('wz_tabs',JSON.stringify(tabs));
-    localStorage.setItem('wz_active',active?active.dataset.id:'readme');
-  }
-  function restoreState(){
-    const savedTheme=localStorage.getItem('wz_theme');
-    if(savedTheme) setTheme(savedTheme);
-    let tabs=[]; try{ tabs=JSON.parse(localStorage.getItem('wz_tabs'))||[]; }catch(e){}
-    if(!tabs.length) tabs=['readme'];
-    tabs.forEach(id=>{ if(meta[id]) openTabSilent(id); });
-    const active=localStorage.getItem('wz_active')||tabs[0];
-    switchTab(meta[active]?active:tabs[0]);
-  }
-  function openTabSilent(id){
-    if(document.querySelector('.tab[data-id="'+id+'"]')) return;
-    const m=meta[id];
-    const t=document.createElement('div');
-    t.className='tab'; t.dataset.id=id;
-    t.innerHTML='<i class="fico '+m.icon+'"></i> '+m.name+
-      ' <span class="x" onclick="closeTab(event,\''+id+'\')">'+
-      '<i class="codicon codicon-close close-ic"></i><span class="dot">●</span></span>';
-    t.onclick=()=>switchTab(id);
-    document.getElementById('tabs').appendChild(t);
-  }
-
-  /* ---------- Command Palette ---------- */
-  let palIndex=0, palItems=[];
-  function openPalette(prefix){
-    const ov=document.getElementById('palette');
-    ov.classList.add('open');
-    const inp=document.getElementById('pal-input');
-    inp.value=prefix||''; renderPalette(); inp.focus();
-  }
-  function closePalette(){ document.getElementById('palette').classList.remove('open'); }
-  function renderPalette(){
-    const q=document.getElementById('pal-input').value;
-    const list=document.getElementById('pal-list');
-    palItems=[];
+  filtered(){
+    const q = (this.state.palQ || '').trim();
     if(q.startsWith('>')){
-      const term=q.slice(1).toLowerCase().trim();
-      const cmds=[
-        {label:'Preferences: Color Theme — Dracula', icon:'codicon codicon-color-mode', act:()=>setTheme('dracula')},
-        {label:'Preferences: Color Theme — Light+', icon:'codicon codicon-color-mode', act:()=>setTheme('light')},
-        {label:'Preferences: Color Theme — Monokai', icon:'codicon codicon-color-mode', act:()=>setTheme('monokai')},
-        {label:'View: Focus Terminal', icon:'codicon codicon-terminal', act:()=>document.getElementById('term-input').focus()},
-        {label:'Go to File...', icon:'codicon codicon-go-to-file', act:()=>openPalette('')}
-      ];
-      palItems=cmds.filter(c=>c.label.toLowerCase().includes(term.replace('theme','')) || c.label.toLowerCase().includes(term));
-    } else {
-      const term=q.toLowerCase().trim();
-      palItems=files.filter(id=>meta[id].name.toLowerCase().includes(term)||id.includes(term))
-        .map(id=>({label:meta[id].name, sub:meta[id].crumbs.slice(0,-1).join('/'), icon:'fico '+meta[id].icon, act:()=>openTab(id)}));
+      const t = q.slice(1).toLowerCase().trim();
+      const list = Object.keys(this.themes).map(k => ({
+        label:'Preferencias: Tema — ' + this.themes[k].label, sub:'tema',
+        icon:'codicon codicon-color-mode', ic:'var(--ac)', act:() => this.setState({ theme:k }, () => this.applyTheme())
+      })).concat([
+        { label:'Ver: Enfocar terminal', sub:'terminal', icon:'codicon codicon-terminal', ic:'var(--ac)', act:() => this.focus() },
+        { label:'Ir a: Contacto', sub:'archivo', icon:'codicon codicon-json', ic:'var(--f)', act:() => this.open('contacto') },
+        { label:'Ir a: Proyectos', sub:'archivo', icon:'devicon-typescript-plain', ic:'var(--v)', act:() => this.open('apps') }
+      ]);
+      return list.filter(c => !t || c.label.toLowerCase().includes(t));
     }
-    palIndex=0;
-    list.innerHTML=palItems.map((it,i)=>
-      '<div class="palette-item'+(i===0?' sel':'')+'" onmouseover="palHover('+i+')" onclick="palRun('+i+')">'+
-      '<i class="'+it.icon+'"></i> '+it.label+(it.sub?'<span class="sub">'+it.sub+'</span>':'')+'</div>'
-    ).join('')||'<div class="palette-item" style="color:var(--muted)">Sin resultados</div>';
-  }
-  function palHover(i){ palIndex=i; updateSel(); }
-  function updateSel(){
-    document.querySelectorAll('.palette-item').forEach((el,i)=>el.classList.toggle('sel',i===palIndex));
-  }
-  function palRun(i){ if(palItems[i]){ palItems[i].act(); closePalette(); } }
-  function paletteKey(e){
-    if(e.key==='Escape'){ closePalette(); }
-    else if(e.key==='ArrowDown'){ e.preventDefault(); palIndex=Math.min(palIndex+1,palItems.length-1); updateSel(); }
-    else if(e.key==='ArrowUp'){ e.preventDefault(); palIndex=Math.max(palIndex-1,0); updateSel(); }
-    else if(e.key==='Enter'){ e.preventDefault(); palRun(palIndex); }
-  }
-  document.addEventListener('keydown',e=>{
-    if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='p'){ e.preventDefault(); openPalette('>'); }
-    else if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='p'){ e.preventDefault(); openPalette(''); }
-    else if(e.key==='Escape'){ closePalette(); }
-  });
-
-  /* ---------- Terminal ---------- */
-  const COMMANDS=['help','whoami','ls','open','skills','contact','theme','clear'];
-  function print(html){
-    const body=document.getElementById('term-body');
-    const cur=document.getElementById('term-current');
-    const d=document.createElement('div'); d.className='line'; d.innerHTML=html;
-    body.insertBefore(d,cur);
-    body.scrollTop=body.scrollHeight;
-  }
-  function runCmd(e){
-    const input=document.getElementById('term-input');
-    if(e.key==='Tab'){
-      e.preventDefault();
-      const val=input.value.trim().toLowerCase();
-      const match=COMMANDS.find(c=>c.startsWith(val)&&val);
-      if(match) input.value=match+' ';
-      return;
-    }
-    if(e.key!=='Enter') return;
-    const cmd=input.value.trim(); input.value='';
-    print('<span class="path">walter@portfolio</span>:<span class="prompt">~$</span> '+cmd);
-    const c=cmd.toLowerCase();
-    if(c==='help') print('Comandos: <span style="color:var(--green)">whoami</span>, <span style="color:var(--green)">ls</span>, <span style="color:var(--green)">open <archivo></span>, <span style="color:var(--green)">skills</span>, <span style="color:var(--green)">contact</span>, <span style="color:var(--green)">theme <dracula|light|monokai></span>, <span style="color:var(--green)">clear</span>');
-    else if(c==='whoami') print('Walter Zuñiga Lineros — Ingeniero en Sistemas · Full-Stack + Data & BI 🍒');
-    else if(c==='ls') print(files.map(k=>meta[k].name).join('  '));
-    else if(c==='skills') print('PHP · JS · Node · Vue · MSSQL · PostgreSQL · Power BI · Fabric · DAX · PySpark · Docker · Git');
-    else if(c==='contact'){ openTab('contact'); print('Abriendo contact.json ...'); }
-    else if(c.startsWith('theme')){
-      const t=c.split(/\s+/)[1];
-      if(themes.includes(t)){ setTheme(t); print('Tema cambiado a <span style="color:var(--green)">'+themeLabel[t]+'</span>'); }
-      else print('<span style="color:var(--red)">temas:</span> dracula · light · monokai');
-    }
-    else if(c.startsWith('open ')){
-      const q=c.slice(5).replace(/\..*$/,'').trim();
-      const key=files.find(k=>k===q)||files.find(k=>meta[k].name.toLowerCase().startsWith(q))||files.find(k=>c.includes(k));
-      if(key){ openTab(key); print('Abriendo '+meta[key].name+' ...'); }
-      else print('<span style="color:var(--red)">archivo no encontrado:</span> '+q);
-    }
-    else if(c==='clear'){ document.querySelectorAll('#term-body .line').forEach(l=>{ if(l.id!=='term-current') l.remove(); }); }
-    else if(c===''){}
-    else print('<span style="color:var(--red)">comando no reconocido:</span> '+cmd+' — escribe <span style="color:var(--green)">help</span>');
-    input.focus();
+    const t = q.toLowerCase();
+    return Object.keys(this.meta)
+      .filter(id => !t || this.meta[id].n.toLowerCase().includes(t) || id.includes(t))
+      .map(id => ({
+        label:this.meta[id].n, sub:this.meta[id].crumbs.slice(0, -1).join('/') || 'raíz',
+        icon:this.meta[id].i, ic:this.meta[id].c, act:() => this.open(id)
+      }));
   }
 
-  /* ---------- Fake Ln/Col ---------- */
-  document.getElementById('scroll').addEventListener('scroll',function(){
-    const line=Math.max(1,Math.floor(this.scrollTop/22)+1);
-    document.getElementById('lncol').textContent='Ln '+line+', Col 1';
-  });
+  openPal(prefix){
+    this.setState({ pal:true, palQ:prefix, palSel:0 }, () => {
+      if(this.palRef.current){ this.palRef.current.value = prefix; this.palRef.current.focus(); }
+    });
+  }
 
-  /* ---------- Init ---------- */
-  restoreState();
+  focus(){ if(this.inputRef.current) this.inputRef.current.focus(); }
+
+  print(lines){
+    this.setState({ term: this.state.term.concat(lines) }, () => {
+      const t = this.termRef.current;
+      if(t) t.scrollTop = t.scrollHeight;
+    });
+  }
+
+  run(raw){
+    const cmd = raw.trim();
+    const echo = { prompt:'walter@portafolio ~ $', text:cmd, color:'var(--txt)' };
+    const c = cmd.toLowerCase();
+    const out = [];
+    const say = (text, color) => out.push({ prompt:'', text, color: color || 'var(--dim)' });
+    if(!c){ this.print([echo]); return; }
+    if(c === 'limpiar'){ this.setState({ term:[] }); return; }
+    if(c === 'ayuda'){
+      say('Comandos disponibles:', 'var(--txt)');
+      say('ayuda        esta lista');
+      say('whoami       resumen profesional en una línea');
+      say('ls           archivos del portafolio');
+      say('abrir <arch> abre un archivo en el editor');
+      say('proyectos    plataformas construidas');
+      say('bi           portafolio de Power BI');
+      say('micomedor    proyecto personal (PWA de comedor)');
+      say('skills       stack técnico');
+      say('contacto     datos de contacto');
+      say('tema <n>     obsidiana · cobalto · papel');
+      say('limpiar      limpia la terminal');
+    }
+    else if(c === 'whoami') say('Walter Zuñiga Lineros — Ingeniero en Sistemas. Construyo software y modelo los datos que ese software genera.', 'var(--txt)');
+    else if(c === 'ls') say(Object.keys(this.meta).map(k => this.meta[k].n).join('   '));
+    else if(c === 'proyectos'){ say('6 plataformas en producción: GesMat · Estimaciones Productivas · Tickets de Adquisiciones · Tracker de Contenedores · Detenciones · SISOR Mantención'); this.open('apps'); }
+    else if(c === 'bi'){ say('~35 reportes Power BI en 60+ archivos, con RLS para productores y clientes externos.'); this.open('bi'); }
+    else if(c === 'micomedor'){ say('MiComedor — PWA propia para gestionar un comedor de planta: minuta mensual, retiro por QR y reportes de adhesión.'); this.open('micomedor'); }
+    else if(c === 'skills') say('TypeScript · Node · Bun · Vue 3 · Angular · PostgreSQL · SQL Server · Prisma · Power BI · DAX · Fabric · Docker · Azure AD');
+    else if(c === 'contacto'){ say('walter.zunigalineros@gmail.com · +56 9 5730 0522 · linkedin.com/in/walterzuñigalineros'); this.open('contacto'); }
+    else if(c.startsWith('tema')){
+      const t = c.split(/\s+/)[1];
+      if(this.themes[t]){ this.setState({ theme:t }, () => this.applyTheme()); say('Tema aplicado: ' + this.themes[t].label, 'var(--s)'); }
+      else say('Temas: obsidiana · cobalto · papel', 'var(--n)');
+    }
+    else if(c.startsWith('abrir')){
+      const q = c.replace('abrir', '').replace(/\..*$/, '').trim();
+      const key = Object.keys(this.meta).find(k => k === q) ||
+        Object.keys(this.meta).find(k => this.meta[k].n.toLowerCase().startsWith(q)) ||
+        Object.keys(this.meta).find(k => q && k.includes(q));
+      if(key){ say('Abriendo ' + this.meta[key].n, 'var(--s)'); this.open(key); }
+      else say('No existe ese archivo: ' + q, 'var(--n)');
+    }
+    else say('Comando no reconocido: ' + cmd + ' — escribe «ayuda»', 'var(--n)');
+    this.print([echo].concat(out));
+  }
+
+  renderVals(){
+    const st = this.state;
+    return {
+      rootRef:this.rootRef, scrollRef:this.scrollRef, gutterRef:this.gutterRef, mmRef:this.mmRef,
+      crumbRef:this.crumbRef, termRef:this.termRef, inputRef:this.inputRef, palRef:this.palRef,
+      themeRef:this.themeRef, lnRef:this.lnRef,
+
+      openTabs: st.tabs.map(id => ({
+        id, name:this.meta[id].n, icon:this.meta[id].i, ic:this.meta[id].c,
+        bg: st.active === id ? 'var(--bg)' : 'var(--bg2)',
+        fg: st.active === id ? 'var(--txt)' : 'var(--mut)',
+        bt: st.active === id ? 'var(--ac)' : 'transparent'
+      })),
+      termLines: st.term,
+      palOpen: st.pal,
+      palItems: this.filtered().map((it, i) => ({
+        idx:String(i), label:it.label, sub:it.sub, icon:it.icon, ic:it.ic,
+        bg: i === st.palSel ? 'var(--sel)' : 'transparent',
+        fg: i === st.palSel ? 'var(--txt)' : 'var(--dim)'
+      })),
+
+      openFile: (e) => this.open(e.currentTarget.dataset.file),
+      openContact: () => this.open('contacto'),
+      selectTab: (e) => { const id = e.currentTarget.dataset.tab; if(id) this.setState({ active:id }, () => this.refresh()); },
+      closeTab: (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.dataset.close;
+        let tabs = st.tabs.filter(t => t !== id);
+        let active = st.active === id ? (tabs[tabs.length - 1] || 'readme') : st.active;
+        if(!tabs.length){ tabs = ['readme']; active = 'readme'; }
+        this.setState({ tabs, active }, () => this.refresh());
+      },
+      toggleFolder: (e) => {
+        const r = this.rootRef.current, key = e.currentTarget.dataset.folder;
+        const nest = r.querySelector('[data-nest="' + key + '"]');
+        const chev = e.currentTarget.querySelector('.codicon-chevron-down');
+        if(!nest) return;
+        const hidden = nest.style.display === 'none';
+        nest.style.display = hidden ? 'flex' : 'none';
+        if(chev) chev.style.transform = hidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+      },
+      toggleNav: () => this.setState({ nav: !st.nav }, () => this.applyLayout()),
+      cycleTheme: () => {
+        const ks = Object.keys(this.themes);
+        this.setState({ theme: ks[(ks.indexOf(st.theme) + 1) % ks.length] }, () => this.applyTheme());
+      },
+      focusTerm: () => this.focus(),
+      openPalette: () => this.openPal(''),
+      palBackdrop: (e) => { if(e.target === e.currentTarget) this.setState({ pal:false }); },
+      palInput: (e) => this.setState({ palQ:e.target.value, palSel:0 }),
+      palHover: (e) => this.setState({ palSel: Number(e.currentTarget.dataset.pal) }),
+      palRun: (e) => {
+        const it = this.filtered()[Number(e.currentTarget.dataset.pal)];
+        this.setState({ pal:false }, () => { if(it) it.act(); });
+      },
+      palKey: (e) => {
+        const items = this.filtered();
+        if(e.key === 'ArrowDown'){ e.preventDefault(); this.setState({ palSel: Math.min(st.palSel + 1, items.length - 1) }); }
+        else if(e.key === 'ArrowUp'){ e.preventDefault(); this.setState({ palSel: Math.max(st.palSel - 1, 0) }); }
+        else if(e.key === 'Enter'){ e.preventDefault(); const it = items[st.palSel]; this.setState({ pal:false }, () => { if(it) it.act(); }); }
+        else if(e.key === 'Escape'){ this.setState({ pal:false }); }
+      },
+      termKey: (e) => {
+        if(e.key === 'Tab'){
+          e.preventDefault();
+          const v = e.target.value.trim().toLowerCase();
+          const m = v && this.cmds.find(c => c.startsWith(v));
+          if(m) e.target.value = m + (m === 'abrir' || m === 'tema' ? ' ' : '');
+          return;
+        }
+        if(e.key !== 'Enter') return;
+        const v = e.target.value;
+        e.target.value = '';
+        this.run(v);
+      }
+    };
+  }
+}
 </script>
 </body>
 </html>
