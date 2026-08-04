@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mixtape — Guardá las partes buenas. Escuchalas juntas.</title>
+<meta name="description" content="Biblioteca personal de momentos de YouTube. Pegá una URL, marcá los segmentos exactos y reproducí solo lo que importa — uno tras otro, como una cinta.">
+<meta property="og:title" content="mixtape — Guardá las partes buenas">
+<meta property="og:description" content="Una biblioteca de momentos: marcá los pedazos que importan con precisión de segundo y suenan todos seguidos.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a0a0c'/><text x='16' y='24' text-anchor='middle' font-family='Georgia,serif' font-size='21' fill='%23ff3b30'>m</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ---- Design system Mixtape — portado de src/styles.css (@theme) ---- */
+:root{
+  --fondo:#0a0a0c;
+  --superficie:#14141a;
+  --elevado:#1b1b22;
+  --borde:rgba(228,230,245,.1);
+  --borde-fuerte:rgba(228,230,245,.18);
+  --texto:rgba(247,248,252,.92);
+  --tenue:rgba(247,248,252,.55);
+  --debil:rgba(247,248,252,.34);
+  --acento:#ff3b30;
+  --acento-claro:#ff6a5c;
+  --font-display:"Cormorant Garamond",Georgia,serif;
+  --font-sans:"Hanken Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;background:var(--fondo);color:var(--texto);
+  font-family:var(--font-sans);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+::selection{background:rgba(255,59,48,.32);color:#fff}
+a{color:inherit}
+h1,h2,h3,p{margin:0}
+
+.gradiente-acento{background:linear-gradient(135deg,#ff7a6e,#ff3b30 55%,#c81e14)}
+
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+@keyframes glowPulse{0%,100%{opacity:.65}50%{opacity:1}}
+
+/* ---- Layout ---- */
+.wrap{max-width:1180px;margin-inline:auto;padding:56px 28px}
+@media (max-width:640px){.wrap{padding:40px 20px}}
+
+/* ---- Barra de vuelta al portafolio ---- */
+.volver{
+  position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);
+  background:rgba(10,10,12,.78);border-bottom:1px solid var(--borde);
+}
+.volver-in{
+  max-width:1180px;margin-inline:auto;padding:12px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.volver a{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--tenue);text-decoration:none;transition:color .2s;
+}
+.volver a:hover{color:var(--texto)}
+.volver .marca{font-family:var(--font-display);font-size:1.35rem;color:var(--texto);letter-spacing:.01em}
+@media (max-width:640px){.volver-in{padding:12px 20px}}
+
+/* ---- Eyebrow ---- */
+.eyebrow{
+  display:flex;width:fit-content;align-items:center;gap:.6em;
+  font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;
+  letter-spacing:.18em;color:var(--acento-claro);
+}
+.eyebrow::before{
+  content:"";display:inline-block;width:5px;height:5px;flex-shrink:0;border-radius:50%;
+  background:var(--acento);box-shadow:0 0 10px rgba(255,59,48,.9);
+  animation:pulseDot 1.6s ease-in-out infinite;
+}
+
+/* ---- Pill ---- */
+.pill{
+  display:inline-flex;align-items:center;gap:8px;border-radius:999px;
+  font-size:.875rem;font-weight:600;padding:10px 20px;text-decoration:none;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.pill:hover{transform:translateY(-1px)}
+.pill-acento{
+  background:linear-gradient(135deg,#ff7a6e,#ff3b30 55%,#c81e14);color:#fff;
+  border:1px solid rgba(255,255,255,.24);
+  box-shadow:0 6px 20px -8px rgba(255,59,48,.55),inset 0 1px 0 rgba(255,255,255,.35);
+}
+.pill-acento:hover{box-shadow:0 12px 30px -8px rgba(255,59,48,.7),inset 0 1px 0 rgba(255,255,255,.45)}
+.pill-ghost{background:transparent;color:var(--texto);font-weight:500;border:1px solid var(--borde)}
+.pill-ghost:hover{border-color:rgba(255,59,48,.5)}
+.pill-solida{background:var(--elevado);color:var(--texto);font-weight:500;border:1px solid var(--borde)}
+.pill-solida:hover{border-color:rgba(255,59,48,.5)}
+.pill.ring{box-shadow:0 0 0 2px rgba(255,106,92,.7)}
+
+/* ---- Card ---- */
+.card{
+  border-radius:16px;border:1px solid var(--borde);background:var(--superficie);
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,59,48,.5);box-shadow:0 24px 56px -34px rgba(255,59,48,.5)}
+
+/* ---- Tag ---- */
+.tag{
+  display:inline-flex;align-items:center;border-radius:999px;
+  border:1px solid var(--borde-fuerte);background:var(--elevado);
+  padding:3px 10px;font-family:var(--font-mono);font-size:.62rem;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--tenue);
+}
+.time-display{
+  font-family:var(--font-mono);font-size:.72rem;font-variant-numeric:tabular-nums;
+  color:var(--acento-claro);
+}
+
+/* ---- Hero ---- */
+.hero{
+  position:relative;overflow:hidden;border-radius:20px;
+  border:1px solid var(--borde);background:color-mix(in srgb,var(--superficie) 60%,transparent);
+  padding:48px;
+}
+@media (max-width:640px){.hero{padding:32px 24px}}
+.hero h1{
+  margin-top:20px;max-width:42rem;font-family:var(--font-display);
+  font-size:clamp(2.25rem,6vw,3.75rem);font-weight:500;line-height:1.05;
+}
+.hero h1 em{font-style:normal;font-weight:600;color:var(--acento-claro)}
+.hero .sub{margin-top:24px;max-width:42ch;font-size:1.125rem;color:var(--tenue)}
+.hero .acciones{margin-top:32px;display:flex;flex-wrap:wrap;gap:12px}
+.hero .cinta{
+  margin-top:40px;border-radius:16px;border:1px solid var(--borde-fuerte);
+  background:color-mix(in srgb,var(--elevado) 60%,transparent);padding:20px;
+}
+
+/* ---- Secciones ---- */
+.sec{margin-top:96px}
+@media (max-width:640px){.sec{margin-top:72px}}
+.sec-problema{max-width:48rem}
+.sec-problema .grande{
+  margin-top:24px;font-family:var(--font-display);
+  font-size:clamp(1.875rem,5vw,3rem);font-weight:500;line-height:1.12;
+}
+.sec-problema .cuerpo{margin-top:24px;max-width:52ch;font-size:1.125rem;color:var(--tenue)}
+.sec-problema .remate{
+  margin-top:20px;font-family:var(--font-display);font-style:italic;
+  font-size:clamp(1.5rem,4vw,1.875rem);color:var(--acento-claro);
+}
+
+/* ---- Pasos ---- */
+.pasos{margin-top:40px;display:flex;flex-direction:column;gap:96px}
+@media (max-width:640px){.pasos{gap:64px}}
+.paso{display:grid;align-items:center;gap:32px}
+@media (min-width:1024px){.paso{grid-template-columns:1fr 1fr}.paso.invertido .paso-texto{order:2}.paso.invertido .paso-demo{order:1}}
+.paso-num{font-family:var(--font-mono);font-size:2.25rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--acento)}
+.paso h3{margin-top:12px;font-family:var(--font-display);font-size:clamp(1.875rem,4vw,2.25rem);font-weight:500}
+.paso p{margin-top:12px;max-width:42ch;font-size:1.02rem;line-height:1.7;color:var(--tenue)}
+.paso-demo{min-width:0}
+.demo{border-radius:16px;border:1px solid var(--borde-fuerte);background:color-mix(in srgb,var(--elevado) 60%,transparent);padding:20px}
+
+/* ---- Demo: pegar URL ---- */
+.url-input{
+  display:flex;align-items:center;gap:10px;border-radius:12px;
+  border:1px solid var(--borde);background:var(--fondo);padding:12px 14px;
+  font-family:var(--font-mono);font-size:.82rem;color:var(--texto);min-height:44px;
+}
+.url-input .caret{display:inline-block;width:1px;height:1.1em;background:var(--acento-claro);animation:pulseDot 1s steps(2) infinite}
+.url-input .ph{color:var(--debil)}
+.demo-slot{margin-top:12px;min-height:1.75rem;display:flex;align-items:center}
+.portada{
+  margin-top:8px;display:flex;align-items:center;gap:16px;border-radius:12px;
+  border:1px solid var(--borde);background:var(--superficie);padding:12px;
+  animation:rise .5s ease-out;
+}
+.portada .miniatura{height:56px;width:96px;flex-shrink:0;overflow:hidden;border-radius:8px;border:1px solid var(--borde-fuerte);background:var(--fondo)}
+.portada .canal{font-family:var(--font-mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.16em;color:var(--acento-claro)}
+.portada .titulo{font-family:var(--font-display);font-size:1.125rem;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- Demo: marcar ---- */
+.demo > * + *{margin-top:16px}
+.time-input{border-radius:12px;border:1px solid var(--borde);background:var(--fondo);padding:10px 14px}
+.time-input .label{font-family:var(--font-mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--debil)}
+.time-input .valor{margin-top:4px;font-family:var(--font-mono);font-size:1.1rem;font-variant-numeric:tabular-nums;color:var(--texto)}
+.fila{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.onda-caja{position:relative;height:80px;overflow:hidden;border-radius:12px;border:1px solid var(--borde);background:var(--fondo)}
+.rango{position:absolute;top:0;bottom:0;border-radius:6px;border-left:1px solid rgba(255,59,48,.5);border-right:1px solid rgba(255,59,48,.5);background:rgba(255,59,48,.1);pointer-events:none}
+.oculto{display:none}
+.aparece{animation:rise .4s ease-out}
+
+/* ---- Demo: reproducir ---- */
+.demo-head{display:flex;align-items:center;justify-content:space-between}
+.demo-head .lbl{font-family:var(--font-mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;color:var(--tenue)}
+.contador{
+  border-radius:999px;border:1px solid rgba(255,59,48,.28);background:rgba(255,59,48,.1);
+  padding:2px 10px;font-family:var(--font-mono);font-size:.62rem;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--acento-claro);
+}
+.controles{margin-top:16px;display:flex;align-items:center;gap:12px}
+.glifo{display:grid;place-items:center;height:36px;width:36px;border-radius:50%;border:1px solid var(--borde);background:var(--elevado);color:var(--tenue)}
+.glifo-play{
+  display:grid;place-items:center;height:44px;width:44px;border-radius:50%;color:#fff;
+  background:linear-gradient(135deg,#ff7a6e,#ff3b30 55%,#c81e14);
+  box-shadow:0 6px 20px -8px rgba(255,59,48,.55);
+}
+
+/* ---- Ventajas ---- */
+.ventajas{margin-top:32px;display:grid;gap:16px}
+@media (min-width:640px){.ventajas{grid-template-columns:1fr 1fr}}
+.ventaja{padding:24px}
+.ventaja .kicker{margin-top:20px;font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.18em;color:var(--acento-claro)}
+.ventaja h3{margin-top:8px;font-family:var(--font-display);font-size:1.5rem;font-weight:500}
+.ventaja p{margin-top:8px;font-size:.95rem;line-height:1.7;color:var(--tenue)}
+.vis{position:relative;height:112px;overflow:hidden;border-radius:12px;border:1px solid var(--borde);background:var(--fondo)}
+.vis-badge{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);border-radius:6px;border:1px solid var(--borde-fuerte);background:color-mix(in srgb,var(--superficie) 90%,transparent);padding:2px 8px}
+.vis-cinta{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px}
+.vis-cinta .fila-c{display:flex;align-items:center;gap:8px;border-radius:8px;border:1px solid var(--borde);background:var(--superficie);padding:6px 8px}
+.vis-cinta .fila-c.on{border-color:rgba(255,59,48,.5);background:rgba(255,59,48,.1);animation:glowPulse 4s ease-in-out infinite}
+.vis-cinta .n{font-family:var(--font-mono);font-size:.6rem;color:var(--tenue);flex-shrink:0}
+.vis-cinta .barra{height:6px;flex-shrink:0;border-radius:999px;background:rgba(255,59,48,.5)}
+.vis-tags{display:flex;flex-wrap:wrap;align-content:center;align-items:center;gap:8px;padding:16px;height:112px;border-radius:12px;border:1px solid var(--borde);background:var(--fondo)}
+.vis-player{display:grid;place-items:center}
+.vis-player .boton{
+  display:grid;place-items:center;height:48px;width:48px;border-radius:50%;color:#fff;font-size:1.125rem;
+  background:linear-gradient(135deg,#ff7a6e,#ff3b30 55%,#c81e14);
+  box-shadow:0 6px 20px -8px rgba(255,59,48,.55);animation:glowPulse 4s ease-in-out infinite;
+}
+.vis-player .nota{
+  position:absolute;bottom:8px;right:8px;border-radius:6px;border:1px solid var(--borde-fuerte);
+  background:color-mix(in srgb,var(--superficie) 90%,transparent);padding:2px 8px;
+  font-family:var(--font-mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--tenue);
+}
+
+/* ---- Función reina ---- */
+.reina{
+  margin-top:96px;overflow:hidden;border-radius:20px;border:1px solid var(--borde);
+  background:color-mix(in srgb,var(--superficie) 60%,transparent);padding:48px;
+}
+@media (max-width:640px){.reina{margin-top:72px;padding:32px 24px}}
+.reina h2{margin-top:20px;max-width:42rem;font-family:var(--font-display);font-size:clamp(1.875rem,5vw,3rem);font-weight:500;line-height:1.08}
+.reina p{margin-top:24px;max-width:54ch;font-size:1.125rem;color:var(--tenue)}
+.reina .onda{margin-top:40px;height:112px;border-radius:16px;border:1px solid var(--borde-fuerte);background:color-mix(in srgb,var(--elevado) 60%,transparent);padding:16px}
+@media (min-width:640px){.reina .onda{height:128px}}
+
+/* ---- Cierre ---- */
+.cierre{
+  margin-top:96px;margin-bottom:24px;border-radius:20px;border:1px solid var(--borde);
+  background:linear-gradient(to bottom,color-mix(in srgb,var(--superficie) 60%,transparent),color-mix(in srgb,var(--elevado) 40%,transparent));
+  padding:64px 32px;text-align:center;
+}
+.cierre h2{margin-inline:auto;max-width:42rem;font-family:var(--font-display);font-size:clamp(1.875rem,5vw,3rem);font-weight:500;line-height:1.1}
+.cierre p{margin:20px auto 0;max-width:44ch;font-size:1.125rem;color:var(--tenue)}
+.cierre .acciones{margin-top:32px;display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+
+footer{border-top:1px solid var(--borde);margin-top:64px;padding:32px 0}
+footer .fin{
+  max-width:1180px;margin-inline:auto;padding-inline:28px;display:flex;flex-wrap:wrap;
+  gap:12px;justify-content:space-between;font-family:var(--font-mono);font-size:.68rem;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--debil);
+}
+footer a{color:var(--tenue);text-decoration:none}
+footer a:hover{color:var(--texto)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="volver">
+  <div class="volver-in">
+    <span class="marca">mixtape</span>
+    <a href="../index.html#mixtape">&larr; Volver al portafolio</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="hero">
+    <p class="eyebrow" data-anim>Biblioteca de momentos · YouTube</p>
+    <h1 data-anim>Guardá las partes buenas.<br>Escuchalas <em>juntas</em>.</h1>
+    <p class="sub" data-anim>
+      Pegá una URL de YouTube, marcá los segmentos exactos y reproducí solo los
+      momentos que importan — uno tras otro, como una cinta.
+    </p>
+    <div class="acciones" data-anim>
+      <a class="pill pill-acento" href="https://github.com/walterbzl/mixtape" target="_blank" rel="noopener">Ver el código</a>
+      <a class="pill pill-ghost" href="https://github.com/walterbzl/mixtape#readme" target="_blank" rel="noopener">Leer el README</a>
+    </div>
+    <div class="cinta" data-anim>
+      <div class="tl" data-segmentos="hero" style="height:176px"></div>
+    </div>
+  </section>
+
+  <!-- ================= EL PROBLEMA ================= -->
+  <section class="sec sec-problema">
+    <p class="eyebrow">El problema</p>
+    <p class="grande">Diez minutos de video por los treinta segundos que valían la pena.</p>
+    <p class="cuerpo">
+      Lo mandás a «Ver más tarde» y se pierde entre otros cien. Cuando volvés,
+      tenés que buscar el minuto exacto otra vez — y arrancan los recomendados.
+    </p>
+    <p class="remate">mixtape guarda el minuto, no el video.</p>
+  </section>
+
+  <!-- ================= CÓMO FUNCIONA ================= -->
+  <section class="sec">
+    <p class="eyebrow">Cómo funciona</p>
+    <div class="pasos">
+
+      <div class="paso">
+        <div class="paso-texto">
+          <span class="paso-num">01</span>
+          <h3>Pegás la URL</h3>
+          <p>Traés cualquier link de YouTube. El título, el canal y la portada llegan solos por oEmbed — no pegás nada más.</p>
+        </div>
+        <div class="paso-demo">
+          <div class="demo" id="demo-url" inert>
+            <div class="url-input">
+              <span id="url-texto"></span><span class="caret"></span>
+            </div>
+            <div class="demo-slot"><span class="tag oculto" id="url-tag">válido</span></div>
+            <div class="portada oculto" id="url-portada">
+              <div class="miniatura"><canvas class="wave" data-seed="42"></canvas></div>
+              <div style="min-width:0">
+                <p class="canal">Radiohead</p>
+                <p class="titulo">Weird Fishes / Arpeggi</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="paso invertido">
+        <div class="paso-texto">
+          <span class="paso-num">02</span>
+          <h3>Marcás los momentos</h3>
+          <p>Ajustás el tiempo actual y marcás inicio y fin de cada parte que vale. Le sumás etiquetas y queda guardada.</p>
+        </div>
+        <div class="paso-demo">
+          <div class="demo" id="demo-marcar" inert>
+            <div class="time-input">
+              <div class="label">Tiempo actual (manual)</div>
+              <div class="valor" id="mk-tiempo">1:05</div>
+            </div>
+            <div class="fila">
+              <span class="pill pill-acento" id="mk-inicio">Marcar inicio</span>
+              <span class="pill pill-solida" id="mk-fin">Marcar fin</span>
+              <span class="time-display oculto" id="mk-rango">1:05 → 1:15 · 10s</span>
+            </div>
+            <div class="onda-caja">
+              <canvas class="wave" data-seed="17"></canvas>
+              <div class="rango oculto" id="mk-banda" style="left:30%;right:44%"></div>
+            </div>
+            <div class="fila oculto" id="mk-tags">
+              <span class="tag aparece">SOLO</span>
+              <span class="tag aparece">DROP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-texto">
+          <span class="paso-num">03</span>
+          <h3>Apretás play una vez</h3>
+          <p>Suena todo en fila, uno tras otro. El cabezal recorre la cinta y salta solo si un video no se puede reproducir.</p>
+        </div>
+        <div class="paso-demo">
+          <div class="demo" inert>
+            <div class="demo-head">
+              <span class="lbl">Cola · cinta</span>
+              <span class="contador">4 momentos</span>
+            </div>
+            <div style="margin-top:16px">
+              <div class="tl" data-segmentos="demo" style="height:168px"></div>
+            </div>
+            <div class="controles">
+              <span class="glifo">⏮</span>
+              <span class="glifo-play">▸</span>
+              <span class="glifo">⏭</span>
+              <span class="glifo">↻</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= QUÉ OBTENÉS ================= -->
+  <section class="sec">
+    <p class="eyebrow">Qué obtenés</p>
+    <div class="ventajas">
+
+      <div class="card ventaja">
+        <div class="vis" aria-hidden="true">
+          <canvas class="wave" data-seed="5"></canvas>
+          <div class="rango" style="left:30%;right:40%"></div>
+          <span class="vis-badge"><span class="time-display">2:14 → 2:47 · 33s</span></span>
+        </div>
+        <p class="kicker">Precisión</p>
+        <h3>Al segundo exacto</h3>
+        <p>Guardás del 2:14 al 2:47 — no el video de diez minutos.</p>
+      </div>
+
+      <div class="card ventaja">
+        <div class="vis vis-cinta" aria-hidden="true">
+          <div class="fila-c"><span class="n">1</span><span class="barra" style="width:55%"></span></div>
+          <div class="fila-c on"><span class="n">2</span><span class="barra" style="width:78%"></span></div>
+          <div class="fila-c"><span class="n">3</span><span class="barra" style="width:40%"></span></div>
+        </div>
+        <p class="kicker">Continuo</p>
+        <h3>Una cinta, no una playlist</h3>
+        <p>Los segmentos se reproducen de corrido, como el lado A de un casete.</p>
+      </div>
+
+      <div class="card ventaja">
+        <div class="vis-tags" aria-hidden="true">
+          <span class="tag">SOLO</span><span class="tag">DROP</span><span class="tag">ESTRIBILLO</span>
+          <span class="tag">INTRO</span><span class="tag">OUTRO</span>
+        </div>
+        <p class="kicker">Orden</p>
+        <h3>Etiquetas y listas</h3>
+        <p>Agrupás por tema o por ánimo, no por video. Cada momento con su tag.</p>
+      </div>
+
+      <div class="card ventaja">
+        <div class="vis vis-player" aria-hidden="true">
+          <span class="boton">▸</span>
+          <span class="nota">YouTube · oficial</span>
+        </div>
+        <p class="kicker">Legal</p>
+        <h3>Reproductor oficial</h3>
+        <p>Todo corre en el player de YouTube. Nada de descargas ni archivos sueltos.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= LA FUNCIÓN REINA ================= -->
+  <section class="reina">
+    <p class="eyebrow">La función reina</p>
+    <h2>Apretás play una vez. Suena toda la cinta.</h2>
+    <p>
+      Cada segmento arranca donde lo marcaste y termina donde dijiste. Si un video
+      no se puede reproducir, la cinta salta sola al siguiente — nunca se corta.
+    </p>
+    <div class="onda">
+      <div id="onda-reina" style="position:relative;width:100%;height:100%"></div>
+    </div>
+  </section>
+
+  <!-- ================= CIERRE ================= -->
+  <section class="cierre">
+    <h2>Guardá tu primer momento hoy.</h2>
+    <p>Creás la cuenta, pegás un video y marcás lo que importa. Gratis.</p>
+    <div class="acciones">
+      <a class="pill pill-acento" href="https://github.com/walterbzl/mixtape" target="_blank" rel="noopener">Ver el proyecto en GitHub</a>
+      <a class="pill pill-ghost" href="../index.html#mixtape">Volver al portafolio</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="fin">
+    <span>mixtape · Walter Zúñiga Lineros</span>
+    <span><a href="https://github.com/walterbzl/mixtape" target="_blank" rel="noopener">github.com/walterbzl/mixtape</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  var reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- PRNG seeded (mulberry32) — portado de Waveform.tsx / Timeline.tsx ----
+  function mulberry32(seed){
+    var a = seed;
+    return function(){
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  // ---- Waveform: amplitudes seeded (envolvente propia por seed) ----
+  function generarAmplitudes(seed,n){
+    var rng = mulberry32(9000 + seed*733), raw = new Array(n), i;
+    for(i=0;i<n;i++) raw[i]=rng();
+    var rngEnv = mulberry32(seed+777);
+    var cantPicos = 5 + Math.floor(rngEnv()*3), loud = [];
+    for(i=0;i<cantPicos;i++){
+      loud.push([(i+0.5)/cantPicos + (rngEnv()-0.5)*0.14, 0.4+rngEnv()*0.6, 0.04+rngEnv()*0.055]);
+    }
+    function env(t){
+      var s=0.09;
+      for(var k=0;k<loud.length;k++){ var d=(t-loud[k][0])/loud[k][2]; s+=loud[k][1]*Math.exp(-d*d); }
+      return s>1?1:s;
+    }
+    var amps=new Array(n);
+    for(i=0;i<n;i++){
+      var t=i/(n-1);
+      var sm=(raw[Math.max(0,i-1)] + raw[i]*1.6 + raw[Math.min(n-1,i+1)])/3.6;
+      var a=env(t)*(0.18+0.82*sm);
+      if(rng()>0.94) a=Math.min(1,a*1.7);
+      amps[i]=Math.max(0.03,a);
+    }
+    return amps;
+  }
+
+  // ---- Waveform canvas estática ----
+  function drawWave(canvas,seed){
+    var ctx=canvas.getContext('2d'); if(!ctx) return;
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    var w=canvas.clientWidth, h=canvas.clientHeight;
+    if(!w||!h) return;
+    canvas.width=Math.max(1,Math.round(w*dpr));
+    canvas.height=Math.max(1,Math.round(h*dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+    var midY=h*0.52, maxA=h*0.4;
+    var n=Math.max(48,Math.round(w/3.2)), step=w/n, barW=Math.max(1.5,step*0.6);
+    var amps=generarAmplitudes(seed,n);
+    for(var i=0;i<n;i++){
+      var bh=Math.max(1,amps[i]*maxA), cx=(i+0.5)*step, y=midY-bh, hgt=bh*2;
+      roundRect(ctx,cx-barW/2,y,barW,hgt,Math.min(barW/2,hgt/2));
+      var g=ctx.createLinearGradient(0,midY-maxA,0,midY+maxA);
+      g.addColorStop(0,'rgba(255,110,98,0.75)');
+      g.addColorStop(0.5,'#FF4A3E');
+      g.addColorStop(1,'rgba(255,110,98,0.75)');
+      ctx.fillStyle=g; ctx.fill();
+    }
+  }
+
+  var ondas = [].slice.call(document.querySelectorAll('canvas.wave'));
+  ondas.forEach(function(c){
+    c.style.display='block'; c.style.width='100%'; c.style.height='100%';
+    c.setAttribute('aria-hidden','true');
+  });
+  function pintarOndas(){ ondas.forEach(function(c){ drawWave(c, +c.dataset.seed); }); }
+  requestAnimationFrame(pintarOndas);
+  setTimeout(pintarOndas,400);
+
+  // ---- Waveform revelada al scroll (SVG + cabezal) ----
+  (function(){
+    var host=document.getElementById('onda-reina'); if(!host) return;
+    var N=48, VW=400, VH=100, seed=7;
+    var midY=VH*0.52, maxA=VH*0.4, step=VW/N, barW=Math.max(1.5,step*0.6);
+    var amps=generarAmplitudes(seed,N);
+    var r2=function(n){ return Math.round(n*100)/100; };
+    var svgNS='http://www.w3.org/2000/svg';
+    var svg=document.createElementNS(svgNS,'svg');
+    svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+    svg.setAttribute('preserveAspectRatio','none');
+    svg.setAttribute('aria-hidden','true');
+    svg.style.cssText='display:block;width:100%;height:100%';
+    var defs=document.createElementNS(svgNS,'defs');
+    var grad=document.createElementNS(svgNS,'linearGradient');
+    grad.setAttribute('id','ondaReinaGrad');
+    grad.setAttribute('x1','0');grad.setAttribute('y1','0');
+    grad.setAttribute('x2','0');grad.setAttribute('y2','1');
+    [['0','rgba(255,110,98,0.75)'],['0.5','#FF4A3E'],['1','rgba(255,110,98,0.75)']].forEach(function(s){
+      var st=document.createElementNS(svgNS,'stop');
+      st.setAttribute('offset',s[0]); st.setAttribute('stop-color',s[1]); grad.appendChild(st);
+    });
+    defs.appendChild(grad); svg.appendChild(defs);
+
+    var rects=[];
+    amps.forEach(function(a,i){
+      var bh=Math.max(1,a*maxA), cx=(i+0.5)*step;
+      var r=document.createElementNS(svgNS,'rect');
+      r.setAttribute('x',r2(cx-barW/2)); r.setAttribute('y',r2(midY-bh));
+      r.setAttribute('width',r2(barW)); r.setAttribute('height',r2(bh*2));
+      r.setAttribute('rx',r2(Math.min(barW/2,bh)));
+      r.setAttribute('fill','url(#ondaReinaGrad)');
+      // transform-origin center para el colapso scaleY
+      r.style.transformOrigin=r2(cx)+'px '+r2(midY)+'px';
+      r.style.transformBox='view-box';
+      svg.appendChild(r); rects.push(r);
+    });
+    host.appendChild(svg);
+
+    var cabezal=document.createElement('div');
+    cabezal.style.cssText='position:absolute;top:0;bottom:0;width:2px;transform:translateX(-50%);border-radius:999px;background:var(--acento-claro);box-shadow:0 0 12px 2px rgba(255,59,48,.7);left:0;opacity:0;pointer-events:none';
+    host.appendChild(cabezal);
+
+    // Sin JS/reduced-motion: la onda ya está dibujada a full. Solo colapsamos
+    // si vamos a animar de verdad.
+    if(reducido || typeof IntersectionObserver==='undefined') return;
+    rects.forEach(function(r){ r.style.transform='scaleY(0)'; });
+
+    var revelado=false;
+    function revelar(){
+      if(revelado) return;
+      revelado=true;
+      var mitad=N/2;
+      rects.forEach(function(r,i){
+        var dist=Math.abs(i-mitad);        // stagger from:center
+        r.style.transition='transform .5s cubic-bezier(.22,1,.36,1) '+(dist*0.012)+'s';
+        r.style.transform='scaleY(1)';
+      });
+      cabezal.style.transition='left .6s ease-in-out, opacity .25s';
+      cabezal.style.opacity='1';
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ cabezal.style.left='100%'; });
+      });
+      setTimeout(function(){ cabezal.style.opacity='0'; }, 650);
+    }
+
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(!e.isIntersecting) return;
+        io.disconnect();
+        revelar();
+      });
+    },{threshold:0.2});
+    io.observe(host);
+    // Red de seguridad: si el observer nunca dispara (viewport raro, captura
+    // automatizada, navegador que no scrollea) la onda NO puede quedar invisible
+    // — es el argumento visual de la sección.
+    setTimeout(function(){ io.disconnect(); revelar(); }, 2500);
+  })();
+
+  // ---- Timeline (canvas) — puerto de drawTimeline() ----
+  var SEGMENTOS={
+    hero:[
+      {a:0.06,b:0.20,label:'INTRO',t:'0:22',dur:22},
+      {a:0.30,b:0.52,label:'SOLO', t:'1:15',dur:33},
+      {a:0.60,b:0.72,label:'DROP', t:'2:19',dur:16},
+      {a:0.82,b:0.96,label:'OUTRO',t:'3:48',dur:38}
+    ],
+    demo:[
+      {a:0.05,b:0.19,label:'INTRO',t:'0:21',dur:21},
+      {a:0.28,b:0.50,label:'SOLO', t:'1:12',dur:33},
+      {a:0.58,b:0.71,label:'DROP', t:'2:14',dur:17},
+      {a:0.80,b:0.95,label:'OUTRO',t:'3:40',dur:36}
+    ]
+  };
+  var SEPARACION_ETIQUETA_PX=6;
+  function ampOf(h){ return Math.min(h*0.22,32); }
+  function midOf(h){ return Math.round(h*0.44); }
+
+  // Envolvente fija (seed 20240607) — igual en toda la cinta.
+  function genAmps(n){
+    var rng=mulberry32(20240607), raw=new Array(n), i;
+    for(i=0;i<n;i++) raw[i]=rng();
+    var loud=[[0.05,0.35,0.05],[0.14,0.62,0.06],[0.31,1.0,0.09],[0.44,0.3,0.05],
+              [0.55,0.72,0.07],[0.68,0.96,0.09],[0.8,0.45,0.05],[0.9,0.78,0.07]];
+    function env(t){
+      var s=0.08;
+      for(var k=0;k<loud.length;k++){ var d=(t-loud[k][0])/loud[k][2]; s+=loud[k][1]*Math.exp(-d*d); }
+      return s>1?1:s;
+    }
+    var amps=new Array(n);
+    for(i=0;i<n;i++){
+      var t=i/(n-1);
+      var s=(raw[Math.max(0,i-1)] + raw[i]*1.6 + raw[Math.min(n-1,i+1)])/3.6;
+      var a=env(t)*(0.18+0.82*s);
+      if(rng()>0.94) a=Math.min(1,a*1.7);
+      amps[i]=Math.max(0.025,a);
+    }
+    return amps;
+  }
+
+  function makeWaveLayer(st,bright){
+    var off=document.createElement('canvas');
+    off.width=Math.max(1,Math.round(st.W*st.DPR));
+    off.height=Math.max(1,Math.round(st.H*st.DPR));
+    var c=off.getContext('2d');
+    if(!c||!st.barAmps) return off;
+    c.setTransform(st.DPR,0,0,st.DPR,0,0);
+    var midY=midOf(st.H), maxA=ampOf(st.H), n=st.barCount;
+    var step=st.W/n, barW=Math.max(1.5,step*0.62), rad=barW/2;
+    for(var i=0;i<n;i++){
+      var cx=(i+0.5)*step, bh=Math.max(1,st.barAmps[i]*maxA), y=midY-bh, hgt=bh*2;
+      roundRect(c,cx-barW/2,y,barW,hgt,Math.min(rad,hgt/2));
+      if(bright){
+        var g=c.createLinearGradient(0,midY-maxA,0,midY+maxA);
+        g.addColorStop(0,'rgba(255,96,84,0.85)');
+        g.addColorStop(0.5,'#FF4A3E');
+        g.addColorStop(1,'rgba(255,96,84,0.85)');
+        c.fillStyle=g;
+      } else {
+        c.fillStyle='rgba(206,184,188,0.16)';
+      }
+      c.fill();
+    }
+    return off;
+  }
+
+  function buildLayers(st){
+    if(!st.W||!st.H) return;
+    st.barCount=Math.max(64,Math.round(st.W/3.2));
+    st.barAmps=genAmps(st.barCount);
+    st.dimLayer=makeWaveLayer(st,false);
+    st.hotLayer=makeWaveLayer(st,true);
+  }
+
+  function etiquetaQueCabe(texto,ancho,medir){
+    if(ancho<=0) return '';
+    return medir(texto)<=ancho ? texto : '';
+  }
+
+  function drawTimeline(ctx,st,segs,head,activeIdx){
+    var w=st.W,h=st.H;
+    if(!w||!h||!segs.length) return;
+    var idx=Math.min(Math.max(activeIdx,0),segs.length-1);
+    ctx.clearRect(0,0,w,h);
+    var padX=12, trackW=w-padX*2;
+    var midY=midOf(h), ampA=ampOf(h);
+    var bandTop=midY-ampA, bandH=ampA*2;
+    var labelY=midY-ampA-10, rulerY=midY+ampA+15, timeY=rulerY+15;
+
+    ctx.strokeStyle='rgba(228,230,245,0.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padX,midY); ctx.lineTo(w-padX,midY); ctx.stroke();
+
+    if(st.dimLayer) ctx.drawImage(st.dimLayer,0,0,w,h);
+
+    var asg=segs[idx];
+    var ax=padX+asg.a*trackW, abw=(asg.b-asg.a)*trackW;
+    roundRect(ctx,ax,bandTop-4,abw,bandH+8,8);
+    ctx.fillStyle='rgba(255,59,48,0.07)'; ctx.fill();
+
+    if(st.hotLayer){
+      for(var i=0;i<segs.length;i++){
+        var s=segs[i], x=padX+s.a*trackW, bw=(s.b-s.a)*trackW;
+        ctx.save(); ctx.beginPath();
+        ctx.rect(x,bandTop-5,bw,bandH+10); ctx.clip();
+        ctx.globalAlpha = i===idx ? 1 : 0.66;
+        ctx.drawImage(st.hotLayer,0,0,w,h);
+        ctx.restore();
+      }
+      ctx.globalAlpha=1;
+    }
+
+    var N=40;
+    for(var j=0;j<=N;j++){
+      var xr=padX+(j/N)*trackW, major=j%5===0;
+      ctx.strokeStyle=major?'rgba(228,230,245,0.14)':'rgba(228,230,245,0.06)';
+      ctx.lineWidth=1; ctx.beginPath();
+      ctx.moveTo(xr,rulerY); ctx.lineTo(xr,rulerY-(major?6:3)); ctx.stroke();
+    }
+
+    var medir=function(t){ return ctx.measureText(t).width; };
+    segs.forEach(function(s,i){
+      var x=padX+s.a*trackW, bw=(s.b-s.a)*trackW, active=i===idx;
+      ctx.beginPath(); ctx.arc(x,midY,2.2,0,Math.PI*2);
+      ctx.fillStyle=active?'#FF3B30':'rgba(228,230,245,0.3)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x+bw,midY,2.2,0,Math.PI*2);
+      ctx.fillStyle=active?'#FF3B30':'rgba(228,230,245,0.3)'; ctx.fill();
+
+      var disponible=bw-SEPARACION_ETIQUETA_PX;
+      ctx.font="600 9px 'JetBrains Mono', ui-monospace, monospace";
+      ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+      ctx.fillStyle=active?'#FF6A5C':'rgba(228,230,245,0.42)';
+      var et=etiquetaQueCabe(s.label,disponible,medir);
+      if(et) ctx.fillText(et,x+bw/2,labelY);
+
+      ctx.font="10px 'JetBrains Mono', ui-monospace, monospace";
+      ctx.fillStyle=active?'#FF6A5C':'rgba(228,230,245,0.34)';
+      var tc=etiquetaQueCabe(s.t,disponible,medir);
+      if(tc) ctx.fillText(tc,x+bw/2,timeY);
+    });
+
+    var hx=padX+head*trackW, topY=bandTop-6, botY=bandTop+bandH+6;
+    var lg=ctx.createLinearGradient(0,topY,0,botY);
+    lg.addColorStop(0,'rgba(255,59,48,0.1)');
+    lg.addColorStop(0.5,'#FF3B30');
+    lg.addColorStop(1,'rgba(255,59,48,0.1)');
+    ctx.strokeStyle=lg;
+    ctx.shadowColor='rgba(255,59,48,0.9)'; ctx.shadowBlur=16; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(hx,topY); ctx.lineTo(hx,botY); ctx.stroke();
+    ctx.beginPath(); ctx.arc(hx,topY,4.5,0,Math.PI*2); ctx.fillStyle='#FFEDEA'; ctx.fill();
+    ctx.beginPath(); ctx.arc(hx,botY,3,0,Math.PI*2); ctx.fillStyle='#FF3B30'; ctx.fill();
+    ctx.shadowBlur=0;
+  }
+
+  function fmt(sec){
+    var s=Math.max(0,Math.floor(sec));
+    return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  }
+
+  function montarTimeline(host){
+    var segs=SEGMENTOS[host.dataset.segmentos];
+    if(!segs) return;
+    var total=segs.reduce(function(acc,s){ return acc+s.dur; },0);
+    host.style.position='relative';
+
+    var readout=document.createElement('span');
+    readout.style.cssText='pointer-events:none;position:absolute;right:12px;top:12px;font-family:var(--font-mono);font-size:.75rem;font-variant-numeric:tabular-nums;color:var(--acento-claro)';
+    readout.textContent='0:00 / '+fmt(total);
+    host.appendChild(readout);
+
+    var canvas=document.createElement('canvas');
+    canvas.style.cssText='display:block;width:100%;height:100%';
+    canvas.setAttribute('aria-label','Línea de tiempo tipo cinta con momentos etiquetados y un cabezal de reproducción');
+    host.appendChild(canvas);
+
+    var ctx=canvas.getContext('2d'); if(!ctx) return;
+    var st={W:0,H:0,DPR:0,dimLayer:null,hotLayer:null,barAmps:null,barCount:0};
+
+    function resize(){
+      var dpr=Math.min(window.devicePixelRatio||1,2);
+      var w=canvas.clientWidth, h=canvas.clientHeight;
+      if(w===st.W && h===st.H && dpr===st.DPR) return;
+      st.W=w; st.H=h; st.DPR=dpr;
+      canvas.width=Math.max(1,Math.round(w*dpr));
+      canvas.height=Math.max(1,Math.round(h*dpr));
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      buildLayers(st);
+    }
+
+    // Posición del cabezal a partir del progreso p (segundos dentro de la cinta).
+    function frameDe(p){
+      var acc=0, head=segs[0].a, idx=0;
+      for(var i=0;i<segs.length;i++){
+        if(p<=acc+segs[i].dur){
+          head=segs[i].a+(segs[i].b-segs[i].a)*((p-acc)/segs[i].dur);
+          idx=i; break;
+        }
+        acc+=segs[i].dur;
+      }
+      return {head:head,idx:idx};
+    }
+
+    // Frame inicial SIEMPRE: el loop depende del IntersectionObserver, y si ese
+    // nunca dispara el canvas se quedaba en blanco. El observer decide si se
+    // ANIMA, nunca si se VE.
+    function pintarInicial(){
+      resize();
+      if(!st.W||!st.H) return false;
+      var f=frameDe(reducido ? segs[0].dur : 0);
+      drawTimeline(ctx,st,segs,f.head,f.idx);
+      readout.textContent=fmt(reducido ? segs[0].dur : 0)+' / '+fmt(total);
+      return true;
+    }
+    requestAnimationFrame(function(){ if(!pintarInicial()) setTimeout(pintarInicial,400); });
+
+    if(reducido){
+      window.addEventListener('resize',function(){ st.W=0; pintarInicial(); });
+      return;
+    }
+
+    var periodoMs=13000, t0=null, rafId=null, corriendo=false;
+    function frame(ts){
+      resize();
+      if(t0==null) t0=ts;
+      var p=((((ts-t0)/periodoMs)%1)+1)%1*total;
+      var f=frameDe(p);
+      drawTimeline(ctx,st,segs,f.head,f.idx);
+      readout.textContent=fmt(p)+' / '+fmt(total);
+      rafId=requestAnimationFrame(frame);
+    }
+    function start(){ if(corriendo) return; corriendo=true; rafId=requestAnimationFrame(frame); }
+    function stop(){ corriendo=false; if(rafId!=null) cancelAnimationFrame(rafId); rafId=null; }
+
+    if(typeof IntersectionObserver!=='undefined'){
+      new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ e.isIntersecting ? start() : stop(); });
+      },{threshold:0.02}).observe(canvas);
+    } else { start(); }
+  }
+  [].slice.call(document.querySelectorAll('.tl')).forEach(montarTimeline);
+
+  // ---- Entrada del hero (stagger) ----
+  (function(){
+    var targets=[].slice.call(document.querySelectorAll('#hero [data-anim]'));
+    if(reducido || !targets.length) return;
+    targets.forEach(function(el,i){
+      el.style.opacity='0';
+      el.style.transform='translateY(16px)';
+      el.style.transition='opacity .28s ease-out '+(i*0.045)+'s, transform .28s ease-out '+(i*0.045)+'s';
+    });
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        targets.forEach(function(el){ el.style.opacity='1'; el.style.transform='none'; });
+      });
+    });
+  })();
+
+  // ---- Demo 01: la URL entra de a poco ----
+  (function(){
+    var URL_DEMO='https://youtu.be/dQw4w9WgXcQ', MS=55;
+    var out=document.getElementById('url-texto');
+    var tag=document.getElementById('url-tag');
+    var portada=document.getElementById('url-portada');
+    var caja=document.getElementById('demo-url');
+    if(!out||!caja) return;
+
+    function completar(){
+      out.textContent=URL_DEMO;
+      tag.classList.remove('oculto'); tag.classList.add('aparece');
+      portada.classList.remove('oculto');
+      requestAnimationFrame(pintarOndas);
+    }
+    if(reducido){ completar(); return; }
+
+    var timer=null;
+    function correr(){
+      if(timer) return;
+      out.textContent=''; tag.classList.add('oculto'); portada.classList.add('oculto');
+      var i=0;
+      timer=setInterval(function(){
+        i++; out.textContent=URL_DEMO.slice(0,i);
+        if(i>=URL_DEMO.length){ clearInterval(timer); timer=null; completar(); }
+      },MS);
+    }
+    if(typeof IntersectionObserver!=='undefined'){
+      var io=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting) correr(); });
+      },{threshold:0.4});
+      io.observe(caja);
+      // Igual que la onda: si el observer no dispara, el panel no puede quedar
+      // vacío — se muestra el resultado final sin la animación de tipeo.
+      setTimeout(function(){ if(!timer && !out.textContent) completar(); }, 2500);
+    } else { correr(); }
+  })();
+
+  // ---- Demo 02: secuencia de fases (0 quieto · 1 inicio · 2 fin · 3 tags) ----
+  (function(){
+    var MS_FASE=1100;
+    var caja=document.getElementById('demo-marcar');
+    var tiempo=document.getElementById('mk-tiempo');
+    var pInicio=document.getElementById('mk-inicio');
+    var pFin=document.getElementById('mk-fin');
+    var rango=document.getElementById('mk-rango');
+    var banda=document.getElementById('mk-banda');
+    var tags=document.getElementById('mk-tags');
+    if(!caja) return;
+
+    function aplicar(fase){
+      tiempo.textContent = fase>=2 ? '1:15' : '1:05';
+      pInicio.classList.toggle('ring', fase===1);
+      pFin.classList.toggle('ring', fase===2);
+      var marcado = fase>=2;
+      rango.classList.toggle('oculto', !marcado);
+      banda.classList.toggle('oculto', !marcado);
+      tags.classList.toggle('oculto', fase<3);
+    }
+    if(reducido){ aplicar(3); return; }
+
+    var fase=0, timer=null;
+    function correr(){
+      if(timer) return;
+      timer=setInterval(function(){ fase=(fase+1)%4; aplicar(fase); },MS_FASE);
+    }
+    function parar(){ clearInterval(timer); timer=null; }
+    aplicar(0);
+    if(typeof IntersectionObserver!=='undefined'){
+      new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ e.isIntersecting ? correr() : parar(); });
+      },{threshold:0.3}).observe(caja);
+    } else { correr(); }
+  })();
+
+  // Repintado de ondas al redimensionar (debounce).
+  var rt;
+  window.addEventListener('resize',function(){
+    clearTimeout(rt); rt=setTimeout(pintarOndas,120);
+  });
+})();
+</script>
+</body>
+</html>

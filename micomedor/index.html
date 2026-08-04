@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MiComedor — Come bien, trabaja mejor</title>
+<meta name="description" content="Gestión de asistencia y selección diaria de menú del comedor industrial. Selección anticipada, confirmación por QR en sala y reportería completa.">
+<meta property="og:title" content="MiComedor — Come bien, trabaja mejor">
+<meta property="og:description" content="Del papelito al QR. El comedor de planta planificado, servido y medido desde una sola aplicación.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23faf5e8'/><text x='16' y='24' text-anchor='middle' font-family='Georgia,serif' font-size='21' fill='%23c94a2a'>M</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---- Design system MiComedor — portado de src/styles.css (@theme) ---- */
+:root{
+  color-scheme:light;
+  --dur-rapido:150ms;
+  --dur-base:250ms;
+  --ease-firma:cubic-bezier(.2,.8,.2,1);
+
+  --ink:#1a1410;
+  --ink-soft:#3d2f24;
+  --ink-mute:#6b5a4a;
+  --cream:#f4ecdc;
+  --cream-2:#ebe0c7;
+  --paper:#faf5e8;
+  --paper-dk:#ede3cc;
+  --mustard:#d4a017;
+  --mustard-dk:#a87c0b;
+  --tomato:#c94a2a;
+  --olive:#5a6138;
+  --info:#2d5a6b;
+  --veg:#5a7a2f;
+  --gluten:#b8861a;
+  --line:rgba(26,20,16,.18);
+  --line-strong:rgba(26,20,16,.4);
+
+  --fondo:var(--cream);
+  --superficie:var(--paper);
+  --superficie-2:var(--paper-dk);
+  --texto:var(--ink);
+  --texto-suave:var(--ink-soft);
+  --texto-mute:var(--ink-mute);
+  --borde:var(--line);
+  --borde-fuerte:var(--line-strong);
+  --acento:var(--mustard);
+  --enfasis:var(--tomato);
+
+  --font-display:"Fraunces",Georgia,serif;
+  --font-body:"Inter Tight",ui-sans-serif,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+
+  --t-sello:8px;
+  --t-microdato:9px;
+  --t-etiqueta:10px;
+  --t-rotulo:11px;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;background:var(--fondo);color:var(--texto);
+  font-family:var(--font-body);letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+/* Trama de papel global */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background-image:repeating-linear-gradient(0deg,rgba(26,20,16,.02) 0 1px,transparent 1px 3px);
+  mix-blend-mode:multiply;
+}
+h1,h2,h3,h4,p,ul{margin:0}
+ul{padding:0;list-style:none}
+a{color:var(--enfasis);text-underline-offset:2px;text-decoration-thickness:1px}
+:focus-visible{outline:2px solid var(--mustard);outline-offset:2px}
+
+.page-wrap{width:min(1200px,calc(100% - 2rem));margin-inline:auto}
+
+/* Textura de papel de la sección hero */
+.textura-papel{position:relative}
+.textura-papel > *{position:relative;z-index:1}
+.textura-papel::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(26,20,16,.035) 0 1px,transparent 1px 3px),
+    radial-gradient(circle at 28% 22%,rgba(201,74,42,.06),transparent 60%),
+    radial-gradient(circle at 74% 78%,rgba(212,160,23,.09),transparent 60%);
+  mix-blend-mode:multiply;
+}
+
+/* ---- Barra de vuelta al portafolio ---- */
+.volver{
+  position:sticky;top:0;z-index:50;
+  background:rgba(250,245,232,.85);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--borde);
+}
+.volver-in{
+  width:min(1200px,calc(100% - 2rem));margin-inline:auto;padding:12px 0;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.volver .marca{font-family:var(--font-display);font-size:1.25rem;font-weight:500;color:var(--ink);letter-spacing:-.02em}
+.volver a{
+  font-family:var(--font-mono);font-size:var(--t-rotulo);text-transform:uppercase;
+  letter-spacing:.1em;color:var(--ink-mute);text-decoration:none;transition:color var(--dur-rapido) var(--ease-firma);
+}
+.volver a:hover{color:var(--ink)}
+
+/* ---- Hero ---- */
+.hero{border-bottom:2px solid var(--ink);background:var(--superficie)}
+.hero-grid{
+  display:grid;align-items:stretch;gap:48px;
+  padding:64px 1rem;
+}
+@media (min-width:1024px){
+  .hero-grid{grid-template-columns:1.4fr 1fr;padding-block:80px}
+}
+.hero-col{display:flex;flex-direction:column;justify-content:center}
+.cintillo{
+  margin-bottom:20px;font-family:var(--font-mono);font-size:var(--t-rotulo);
+  text-transform:uppercase;letter-spacing:.3em;color:var(--enfasis);
+}
+.hero h1{
+  font-family:var(--font-display);font-weight:500;line-height:.9;
+  letter-spacing:-.035em;color:var(--texto);
+  font-size:clamp(3.4rem,9vw,6rem);
+}
+.hero h1 .linea{display:block;font-style:italic;font-weight:400;color:var(--enfasis)}
+.hero h1 .punto{color:var(--mustard)}
+.hero .bajada{margin-top:24px;max-width:36rem;font-size:1rem;line-height:1.65;color:var(--texto-suave)}
+.hero .remate{
+  margin-top:20px;font-family:var(--font-display);font-size:1.5rem;font-weight:500;
+  font-style:italic;letter-spacing:-.02em;color:var(--texto);
+}
+.hero .remate .qr{font-style:normal;color:var(--enfasis)}
+
+.chips{margin-top:24px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  display:inline-flex;flex-shrink:0;align-items:center;gap:6px;white-space:nowrap;
+  border-radius:999px;border:1px solid var(--borde);background:var(--superficie);
+  padding:4px 10px;font-family:var(--font-mono);font-size:var(--t-etiqueta);
+  letter-spacing:.08em;color:var(--texto);
+}
+.chip::before{content:"";width:7px;height:7px;flex-shrink:0;border-radius:50%;background:var(--ink-mute)}
+.chip.ok::before{background:var(--olive)}
+.chip.info::before{background:var(--info)}
+
+.botonera{margin-top:32px;display:flex;flex-wrap:wrap;gap:12px}
+.btn{
+  border:1px solid var(--ink);padding:10px 20px;font-family:var(--font-mono);
+  font-size:var(--t-rotulo);font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+  text-decoration:none;transition:background-color var(--dur-rapido) var(--ease-firma);
+}
+.btn-ink{background:var(--ink);color:var(--paper)}
+.btn-ink:hover{background:var(--ink-soft)}
+.btn-mustard{border-color:var(--mustard);background:var(--mustard);color:var(--ink)}
+.btn-mustard:hover{background:var(--mustard-dk)}
+
+/* ---- Panel oscuro con la pila de tickets ---- */
+.panel-tickets{
+  position:relative;display:flex;min-height:380px;align-items:center;justify-content:center;
+  overflow:hidden;border:1px solid var(--ink);background:var(--ink);padding:64px 32px;
+}
+@media (min-width:1024px){.panel-tickets{padding-inline:48px}}
+.panel-tickets::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(45deg,transparent 0 20px,rgba(212,160,23,.05) 20px 21px);
+}
+.panel-tickets .marquesina{
+  pointer-events:none;position:absolute;left:0;right:0;top:20px;text-align:center;
+  font-family:var(--font-mono);font-size:var(--t-etiqueta);text-transform:uppercase;
+  letter-spacing:.4em;color:rgba(250,245,232,.15);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ---- PilaTickets ---- */
+.pila{position:relative;height:300px;width:230px;z-index:1}
+.ticket{
+  position:absolute;left:0;top:0;width:100%;
+  border:1px dashed var(--borde-fuerte);background:var(--cream);padding:16px;
+  font-family:var(--font-mono);font-size:var(--t-etiqueta);color:var(--ink);
+}
+/* Perforaciones de borde superior/inferior (tamaño compacto) */
+.ticket::before,.ticket::after{
+  content:"";pointer-events:none;position:absolute;left:0;right:0;height:10px;
+  background-position:center;
+  background-image:radial-gradient(circle,var(--fondo) 2.5px,transparent 3px);
+  background-size:10px 10px;
+}
+.ticket::before{top:-5px}
+.ticket::after{bottom:-5px;transform:rotate(180deg)}
+.ticket .titulo{margin-top:6px;font-family:var(--font-display);font-size:.875rem;font-weight:500;letter-spacing:-.02em}
+.ticket .filas{margin-top:8px;display:flex;flex-direction:column}
+.ticket .fila{display:flex;justify-content:space-between;border-bottom:1px dotted var(--borde);padding:4px 0;font-size:var(--t-sello)}
+.ticket .fila .k{color:var(--ink-mute)}
+.ticket .fila .v{font-weight:600;color:var(--ink)}
+.ticket .qr{
+  margin:8px auto 0;display:flex;aspect-ratio:1;max-width:92px;
+  align-items:center;justify-content:center;background:var(--ink);padding:6px;
+}
+.ticket .qr svg{width:100%;height:auto;color:var(--cream)}
+
+.chip-dieta{
+  display:inline-flex;flex-shrink:0;align-items:center;gap:4px;white-space:nowrap;
+  border-radius:2px;padding:2px 6px;font-family:var(--font-mono);font-size:var(--t-microdato);
+  font-weight:600;text-transform:uppercase;letter-spacing:.12em;
+}
+.chip-dieta.CL{background:var(--ink);color:var(--paper)}
+.chip-dieta.VEG{background:var(--veg);color:var(--paper)}
+.chip-dieta.SG{background:var(--gluten);color:var(--ink)}
+
+/* Orden translate→rotate, igual que la utilidad transform de Tailwind: al revés
+   el desplazamiento se aplica sobre el eje ya rotado y la pila se apelmaza. */
+.t1{transform:translate(-35px,30px) rotate(-7deg);z-index:1}
+.t2{transform:translate(10px,-5px) rotate(3deg);z-index:2}
+.t3{transform:translate(40px,50px) rotate(-2deg);z-index:3}
+
+/* ---- Sección narrativa ---- */
+.narrativa{padding:64px 0 80px}
+.narrativa-head{
+  margin-bottom:32px;display:flex;flex-direction:column;gap:16px;
+  border-bottom:1px dashed var(--borde);padding-bottom:24px;
+}
+@media (min-width:768px){
+  .narrativa-head{flex-direction:row;align-items:flex-end;justify-content:space-between}
+}
+.narrativa-head h2{
+  max-width:36rem;font-family:var(--font-display);font-size:clamp(2rem,4.5vw,2.5rem);
+  font-weight:500;line-height:.98;letter-spacing:-.02em;color:var(--texto);
+}
+.narrativa-head h2 em{font-style:italic;color:var(--enfasis)}
+.narrativa-head .nota{max-width:24rem;font-size:.875rem;line-height:1.65;color:var(--texto-suave)}
+
+.columnas{display:grid;gap:16px}
+@media (min-width:1024px){.columnas{grid-template-columns:repeat(3,1fr)}}
+.col{display:flex;flex-direction:column;border-top:2px solid;padding:20px}
+.col .orden{font-family:var(--font-mono);font-size:var(--t-microdato);text-transform:uppercase;letter-spacing:.25em;color:var(--texto-mute)}
+.col h4{margin:4px 0 16px;font-family:var(--font-display);font-size:1.125rem;font-weight:500;letter-spacing:-.02em}
+.col h4 em{font-style:italic}
+.col .items{display:flex;flex-direction:column;gap:10px}
+.col .items li{display:flex;gap:10px;font-size:var(--t-rotulo);line-height:1.4}
+.col .items .vineta{margin-top:6px;height:6px;width:6px;flex-shrink:0}
+.col .items .txt{color:var(--texto-suave)}
+.col .items b{display:block;font-weight:600;color:var(--texto)}
+.pilares{
+  margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  border-top:1px dashed var(--borde);padding-top:12px;
+}
+.pilares .celda{text-align:center}
+.pilares .valor{display:block;font-family:var(--font-display);font-size:1.5rem;font-weight:500;line-height:1;color:var(--mustard-dk)}
+.pilares .etq{margin-top:4px;display:block;font-family:var(--font-mono);font-size:var(--t-sello);text-transform:uppercase;letter-spacing:.15em;color:var(--texto-mute)}
+
+.col-problema{border-top-color:var(--ink);background:var(--superficie-2)}
+.col-problema h4{color:var(--texto)}
+.col-problema .vineta{border-radius:50%;background:var(--ink)}
+.col-problema h4 em{color:var(--enfasis)}
+
+.col-propuesta{border-top-color:var(--mustard);background:var(--cream)}
+.col-propuesta h4{color:var(--ink)}
+.col-propuesta h4 em{color:var(--mustard-dk)}
+.col-propuesta .vineta{transform:rotate(45deg);background:var(--mustard-dk)}
+
+.col-roles{border-top-color:var(--tomato);background:var(--cream-2)}
+.col-roles h4{color:var(--ink)}
+.col-roles h4 em{color:var(--tomato)}
+.roles{display:flex;flex-direction:column;gap:10px}
+.rol{
+  display:flex;align-items:flex-start;gap:10px;border:1px solid var(--borde);
+  background:var(--paper);padding:10px;text-decoration:none;
+  transition:border-color var(--dur-rapido) var(--ease-firma);
+}
+.rol:hover{border-color:var(--borde-fuerte)}
+.avatar{
+  display:inline-flex;height:32px;width:32px;flex-shrink:0;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:.875rem;font-weight:500;color:var(--paper);
+}
+.avatar.comensal{background:var(--ink)}
+.avatar.cocinero{background:var(--olive)}
+.avatar.supervisor{background:var(--tomato)}
+.rol .nombre{display:block;font-size:11.5px;font-weight:600;color:var(--ink)}
+.rol .flecha{color:var(--tomato);display:inline-block;margin-left:4px;transition:transform var(--dur-rapido) var(--ease-firma)}
+.rol:hover .flecha{transform:translateX(2px)}
+.rol .detalle{display:block;font-family:var(--font-mono);font-size:9.5px;line-height:1.4;letter-spacing:.02em;color:var(--ink-mute)}
+
+footer{border-top:2px solid var(--ink);background:var(--superficie);padding:28px 0}
+footer .fin{
+  width:min(1200px,calc(100% - 2rem));margin-inline:auto;display:flex;flex-wrap:wrap;
+  gap:12px;justify-content:space-between;font-family:var(--font-mono);
+  font-size:var(--t-etiqueta);text-transform:uppercase;letter-spacing:.12em;color:var(--texto-mute);
+}
+footer a{color:var(--ink-mute);text-decoration:none}
+footer a:hover{color:var(--ink)}
+
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.animar-rise{animation:rise 600ms var(--ease-firma) both}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="volver">
+  <div class="volver-in">
+    <span class="marca">MiComedor</span>
+    <a href="../index.html#micomedor">&larr; Volver al portafolio</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero textura-papel">
+    <div class="page-wrap hero-grid">
+
+      <div class="hero-col">
+        <p class="cintillo">Planta Ranco · Comedor Industrial</p>
+        <h1>
+          Come bien,
+          <span class="linea">trabaja mejor<span class="punto">.</span></span>
+        </h1>
+        <p class="bajada">
+          Gestión de asistencia y selección diaria de menú del comedor.
+          Selección anticipada, confirmación por QR en sala y reportería completa.
+        </p>
+        <p class="remate">Del papelito al <span class="qr">QR</span><span class="punto">.</span></p>
+
+        <div class="chips">
+          <span class="chip ok">v1.0 · Manual vivo</span>
+          <span class="chip info">Design System</span>
+        </div>
+
+        <div class="botonera">
+          <a class="btn btn-ink" href="https://github.com/walterbzl/Mi_Comedor" target="_blank" rel="noopener">Ver el código</a>
+          <a class="btn btn-mustard" href="https://github.com/walterbzl/Mi_Comedor/blob/master/docs/design-system.md" target="_blank" rel="noopener">Sistema de diseño</a>
+        </div>
+      </div>
+
+      <div class="panel-tickets">
+        <p class="marquesina">MiComedor · MiComedor · MiComedor · MiComedor</p>
+        <div class="pila" aria-hidden="true">
+
+          <div class="ticket t1">
+            <span class="chip-dieta VEG" title="Vegetariano">VEG</span>
+            <div class="titulo">Charquicán de zapallo</div>
+            <div class="filas">
+              <div class="fila"><span class="k">Día</span><span class="v">Lun 03 / Mar</span></div>
+              <div class="fila"><span class="k">Comensal</span><span class="v">M. Fuentes</span></div>
+              <div class="fila"><span class="k">Ticket</span><span class="v">#MR-0341</span></div>
+            </div>
+            <div class="qr" data-qr="#MR-0341"></div>
+          </div>
+
+          <div class="ticket t2">
+            <span class="chip-dieta CL" title="Clásico">CL</span>
+            <div class="titulo">Cazuela de vacuno</div>
+            <div class="filas">
+              <div class="fila"><span class="k">Día</span><span class="v">Mar 04 / Mar</span></div>
+              <div class="fila"><span class="k">Comensal</span><span class="v">P. Soto</span></div>
+              <div class="fila"><span class="k">Ticket</span><span class="v">#MR-0342</span></div>
+            </div>
+            <div class="qr" data-qr="#MR-0342"></div>
+          </div>
+
+          <div class="ticket t3">
+            <span class="chip-dieta SG" title="Sin gluten">SG</span>
+            <div class="titulo">Pollo al jengibre</div>
+            <div class="filas">
+              <div class="fila"><span class="k">Día</span><span class="v">Mié 05 / Mar</span></div>
+              <div class="fila"><span class="k">Comensal</span><span class="v">C. Rivas</span></div>
+              <div class="fila"><span class="k">Ticket</span><span class="v">#MR-0343</span></div>
+            </div>
+            <div class="qr" data-qr="#MR-0343"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= DEL DOLOR AL SISTEMA ================= -->
+  <section class="page-wrap narrativa">
+
+    <div class="narrativa-head">
+      <div>
+        <p class="cintillo">Del dolor al sistema</p>
+        <h2>El papelito se va. <em>Entran los datos en vivo.</em></h2>
+      </div>
+      <p class="nota">
+        Hoy el comedor funciona con cuponerías físicas y conteo manual.
+        MiComedor digitaliza el ritual completo —sin perder su calidez— y
+        entrega visibilidad en tiempo real a quien la necesita.
+      </p>
+    </div>
+
+    <div class="columnas">
+
+      <!-- 01 · Problema -->
+      <div class="col col-problema">
+        <p class="orden">01 · Problema</p>
+        <h4>Lo que <em>duele hoy</em></h4>
+        <ul class="items">
+          <li><span class="vineta"></span><span class="txt"><b>Cuponería física.</b>Se rompe, se olvida, se pierde.</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>Conteo manual.</b>Cocina estima diarios «al ojo».</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>Sin trazabilidad.</b>No se sabe quién comió qué.</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>Sobra o falta comida.</b>No hay datos previos.</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>Restricciones invisibles.</b>Veg / sin gluten se pierden.</span></li>
+        </ul>
+        <div class="pilares">
+          <div class="celda"><span class="valor">~12%</span><span class="etq">Desperdicio</span></div>
+          <div class="celda"><span class="valor">0</span><span class="etq">Datos diarios</span></div>
+          <div class="celda"><span class="valor">100%</span><span class="etq">Papel</span></div>
+        </div>
+      </div>
+
+      <!-- 02 · Propuesta -->
+      <div class="col col-propuesta">
+        <p class="orden">02 · Propuesta</p>
+        <h4>Tres pilares, <em>un ritual</em></h4>
+        <ul class="items">
+          <li><span class="vineta"></span><span class="txt"><b>Selección digital.</b>Calendario mensual con menús y restricciones.</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>QR validado.</b>Un ticket único por día, escaneado en cocina.</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>Dashboard en vivo.</b>Pedidos, consumidos y dietas del día.</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>Plazo configurable.</b>Supervisor define rango mensual.</span></li>
+          <li><span class="vineta"></span><span class="txt"><b>Ticket excepcional.</b>Salida manual fuera de plazo.</span></li>
+        </ul>
+        <div class="pilares">
+          <div class="celda"><span class="valor">1 QR</span><span class="etq">por día</span></div>
+          <div class="celda"><span class="valor">3 roles</span><span class="etq">claros</span></div>
+          <div class="celda"><span class="valor">0 papel</span><span class="etq">cotidiano</span></div>
+        </div>
+      </div>
+
+      <!-- 03 · Roles -->
+      <div class="col col-roles">
+        <p class="orden">03 · Roles</p>
+        <h4>Quién hace <em>qué</em></h4>
+        <div class="roles">
+          <a class="rol" href="https://github.com/walterbzl/Mi_Comedor" target="_blank" rel="noopener">
+            <span class="avatar comensal">C</span>
+            <span style="min-width:0">
+              <b class="nombre">Comensal<span class="flecha"> →</span></b>
+              <span class="detalle">Elige menú del día dentro del plazo. Muestra su QR en cocina.</span>
+            </span>
+          </a>
+          <a class="rol" href="https://github.com/walterbzl/Mi_Comedor" target="_blank" rel="noopener">
+            <span class="avatar supervisor">S</span>
+            <span style="min-width:0">
+              <b class="nombre">Supervisor · RR.HH.<span class="flecha"> →</span></b>
+              <span class="detalle">Carga menú mensual, define plazo, sigue adhesión, emite excepciones.</span>
+            </span>
+          </a>
+          <a class="rol" href="https://github.com/walterbzl/Mi_Comedor" target="_blank" rel="noopener">
+            <span class="avatar cocinero">K</span>
+            <span style="min-width:0">
+              <b class="nombre">Cocinero<span class="flecha"> →</span></b>
+              <span class="detalle">Escanea QR por cámara, ve pedidos del día, alergias y hora pico.</span>
+            </span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="fin">
+    <span>MiComedor · Walter Zúñiga Lineros</span>
+    <span><a href="https://github.com/walterbzl/Mi_Comedor" target="_blank" rel="noopener">github.com/walterbzl/Mi_Comedor</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  // ponytail: los QR de la pila son decorativos (la pila entera es aria-hidden).
+  // Un patrón determinista por folio se ve igual que el QR real de qrcode.react
+  // sin arrastrar la librería. Si alguna vez tienen que escanearse de verdad,
+  // acá va un generador QR real — no antes.
+  function mulberry32(seed){
+    var a=seed;
+    return function(){
+      a|=0; a=(a+0x6d2b79f5)|0;
+      var t=Math.imul(a^(a>>>15),1|a);
+      t=(t+Math.imul(t^(t>>>7),61|t))^t;
+      return ((t^(t>>>14))>>>0)/4294967296;
+    };
+  }
+  function hash(str){
+    var h=2166136261;
+    for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); }
+    return h>>>0;
+  }
+  // Patrón tipo QR: finder patterns en 3 esquinas + módulos seeded.
+  function patronQr(payload,n){
+    var rng=mulberry32(hash(payload)), g=[], y, x;
+    for(y=0;y<n;y++){ g.push(new Array(n).fill(0)); }
+    function finder(oy,ox){
+      for(var dy=0;dy<7;dy++) for(var dx=0;dx<7;dx++){
+        var borde = dy===0||dy===6||dx===0||dx===6;
+        var centro = dy>=2&&dy<=4&&dx>=2&&dx<=4;
+        g[oy+dy][ox+dx] = (borde||centro) ? 1 : 0;
+      }
+    }
+    function reservado(yy,xx){
+      return (yy<8&&xx<8) || (yy<8&&xx>=n-8) || (yy>=n-8&&xx<8);
+    }
+    for(y=0;y<n;y++) for(x=0;x<n;x++){
+      if(!reservado(y,x)) g[y][x] = rng()>0.52 ? 1 : 0;
+    }
+    finder(0,0); finder(0,n-7); finder(n-7,0);
+    // timing patterns
+    for(x=8;x<n-8;x++){ g[6][x]=x%2===0?1:0; g[x][6]=x%2===0?1:0; }
+    return g;
+  }
+  var N=25;
+  [].slice.call(document.querySelectorAll('[data-qr]')).forEach(function(host){
+    var g=patronQr(host.dataset.qr,N), d='';
+    for(var y=0;y<N;y++) for(var x=0;x<N;x++){
+      if(g[y][x]) d+='M'+x+' '+y+'h1v1h-1z';
+    }
+    host.innerHTML=
+      '<svg viewBox="0 0 '+N+' '+N+' " role="img" aria-label="Código QR '+host.dataset.qr+'" '+
+      'shape-rendering="crispEdges"><path d="'+d+'" fill="currentColor"/></svg>';
+  });
+})();
+</script>
+</body>
+</html>
